@@ -81,7 +81,7 @@ function TambahSoal() {
     }
 
     if (tipeSoal === '1') {
-      SoalService.createSoal({ id_tugas: uid, tipe: tipeSoal, kalimat_soal: data.kalimat_soal, huruf_soal: JSON.stringify([...hurufSoal]), huruf_bank: JSON.stringify([...data.pilih_huruf_bank]), data_tambahan: ''})
+      SoalService.createSoal({ id_tugas: uid, tipe: tipeSoal, kalimat_soal: data.kalimatsoal, huruf_soal: JSON.stringify([...hurufSoal]), huruf_bank: JSON.stringify([...data.pilih_huruf_bank]), data_tambahan: ''})
         .then(response => {
           toast.success('Soal berhasil dibuat', { position: 'bottom-center' });
           setTimeout(() => {

@@ -8,9 +8,9 @@ const createSoal = (data) => {
     return axios.post(API_URL + "/", data, { headers: authHeader() });
 }
 
-// api disendirikan karena memakai FormData dan contentType yang berbeda
+// api createSoal no 2 disendirikan karena memakai FormData dan juga contentType nya yang berbeda
 const createSoal2 = (data) => {
-    return axios.post("http://localhost:3001/api/uploads", data, { headers: authHeader2() });
+    return axios.post(API_URL + '/createSoal2', data, { headers: authHeader2() });
 }
 
 const getSoalByIdTugas = (id) => {
