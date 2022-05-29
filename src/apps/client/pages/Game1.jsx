@@ -1,6 +1,6 @@
-import React, { Component, Fragment } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
 import { v4 } from 'uuid';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useHistory } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Dialog, Transition } from '@headlessui/react'
 import { ChevronLeftIcon } from '@heroicons/react/solid'
@@ -8,8 +8,11 @@ import { isMobile } from 'react-device-detect';
 import DeviceOrientation, { Orientation } from 'react-screen-orientation'
 import Lottie from 'react-lottie';
 import orien from '../assets/orientation.json'
-import ITEMS from '../data/DataHuruf';
+import toast, { Toaster } from 'react-hot-toast';
+// import ITEMS from '../data/DataHuruf';
 import confetti from '../assets/confetti.json'
+import AuthService from '../../../services/auth.service';
+import JawabanService from '../service/jawaban.service';
 
 // lottie option
 const defaultOptions = {
@@ -20,15 +23,6 @@ const defaultOptions = {
         preserveAspectRatio: "xMidYMid slice"
     },
 
-};
-
-const defaultOptions2 = {
-    loop: true,
-    autoplay: true,
-    animationData: confetti,
-    rendererSettings: {
-        preserveAspectRatio: "xMidYMid slice"
-    }
 };
 
 const copy = (source, destination, droppableSource, droppableDestination) => {
@@ -57,28 +51,63 @@ const move = (source, destination, droppableSource, droppableDestination) => {
     return result;
 };
 
-class Game1 extends Component {
+const Game1 = () => {
 
-    state = {
+    const history = useHistory();
+    const location = useLocation();
+    const [state, setState] = useState({
         data: {
             'Ba1': [],
             'Ta2': [],
             'Ta3': []
         },
-        modal: false,
-        score: 0,
-        modalBank: false
-    };
+    });
+    const [modalBank, setModalBank] = useState(false);
+    const [dataBank, setDataBank] = useState([]);
 
-    componentDidMount() {
-        console.log(this.state);
-    }
+    useEffect(() => {
+        // digunakan untuk setData awal soal dan bank
+        if (location.state) {
+            console.log(location.state);
+            setState(prev => ({
+                ...prev,
+                data: location.state.data.data_soal,
+            }));
+            setDataBank(location.state.data.data_bank);
+        }
 
-    componentDidUpdate() {
-        console.log(this.state);
-    }
+    }, [location]);
 
-    onDragEnd = (result) => {
+    useEffect(() => {
+        const user = AuthService.getCurrentUser();
+
+        if (user) {
+            JawabanService.getJawabanById({ id_user: user.uid, id_soal: location.state.data.id_soal })
+                .then(res => {
+                    if (res.data.success) {
+                        const answer = JSON.parse(res.data.data.jawab);
+                        console.log(answer);
+                        setState(prev => ({
+                            ...prev,
+                            data: {
+                                ...answer
+                            }
+                        }));
+                    }
+                }, (error) => {
+                    console.log("Private page", error.response);
+                    // Invalid token
+                    if (error.response && error.response.status === 401) {
+                        AuthService.logout();
+                        navigate("/login");
+                        window.location.reload();
+                    }
+                })
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [location])
+
+    const onDragEnd = (result) => {
         const { source, destination } = result;
 
         // dropped outside the list
@@ -91,13 +120,13 @@ class Game1 extends Component {
                 break;
             case 'ITEMS':
                 console.log('copy');
-                this.setState(prev => ({
+                setState(prev => ({
                     ...prev,
                     data: {
                         ...prev.data,
                         [destination.droppableId]: copy(
-                            ITEMS,
-                            this.state.data[destination.droppableId],
+                            dataBank,
+                            state.data[destination.droppableId],
                             source,
                             destination
                         )
@@ -106,13 +135,13 @@ class Game1 extends Component {
                 break;
             default:
                 console.log('move');
-                this.setState(prev => ({
+                setState(prev => ({
                     ...prev,
                     data: {
                         ...prev.data,
                         ...move(
-                            this.state.data[source.droppableId],
-                            this.state.data[destination.droppableId],
+                            state.data[source.droppableId],
+                            state.data[destination.droppableId],
                             source,
                             destination
                         )
@@ -124,56 +153,73 @@ class Game1 extends Component {
     };
 
     // hapus digit di soal
-    digitsBeGone(str) {
+    const digitsBeGone = (str) => {
         return str.match(/\D/g).join('')
     }
 
-    openModal(score) {
-        this.setState(prev => ({
-            ...prev,
-            modal: true,
-            score: score
-        }))
+
+    function openBank() {
+        setModalBank(true);
     }
 
-    closeModal() {
-        this.setState(prev => ({
-            ...prev,
-            modal: false
-        }))
+    function closeBank() {
+        setModalBank(false);
     }
 
-    openBank() {
-        this.setState(prev => ({
-            ...prev,
-            modalBank: true
-        }))
-    }
+    async function checkAnswer(data) {
+        const user = AuthService.getCurrentUser();
 
-    closeBank() {
-        this.setState(prev => ({
-            ...prev,
-            modalBank: false
-        }))
-    }
+        // untuk mengecek apakah jawaban sudah diisi semua
+        const checkAllAnswer = Object.keys(data).every(e => data[e].length > 0);
+        console.log(Object.keys(data)[0]);
 
-    async checkAnswer(state) {
-        let arr = await Object.keys(state).filter((item, i) => state[item][0].huruf === this.digitsBeGone(item))
+        if (checkAllAnswer) {
+            // untuk mengecek apakah semua jawaban sudah benar semua sesuai soal
+            let arr = await Object.keys(data).every((item, i) => data[item][0].huruf === digitsBeGone(item))
 
-        console.log(arr);
-
-        if (arr > 0) {
-            this.openModal(arr.length)
+            JawabanService.createJawaban({ id_user: user.uid, id_soal: location.state.data.id_soal, jawab: JSON.stringify(data), nilai: arr })
+                .then(res => {
+                    console.log(res);
+                    toast.success('data berhasil disimpan', { position: 'bottom-center' })
+                }, (error) => {
+                    console.log("Private page", error.response);
+                    // Invalid token
+                    if (error.response && error.response.status === 401) {
+                        AuthService.logout();
+                        navigate("/login");
+                        window.location.reload();
+                    }
+                })
         } else {
-            this.openModal(arr.length)
+            toast.error('Harap isi jawaban', { position: 'bottom-center' })
         }
     }
 
-    render() {
-        return isMobile ? (
+    // digunakan untuk meng genarate warna border berdasarkan jawaban (benas/salah)
+    const generateColorBorder = (key) => {
+        // cek apakah sudah di jawab apa tidak
+        if (state.data[key].length) {
+            // cek apakah jawaban user sesuai dengan soal (benar/salah)
+            if (state.data[key][0].huruf === digitsBeGone(key)) {
+                return 'border-custom-green-primary'
+            } else {
+                return 'border-red-600'
+            }
+        } else {
+            return 'border-black'
+        }
+    }
+
+    const navigate = (route) => {
+        history.push(route);
+    }
+
+    return isMobile ? (
+        <>
+            <Toaster />
             <DeviceOrientation lockOrientation={'landscape'}>
                 <Orientation orientation='landscape' alwaysRender={false}>
-                    <DragDropContext onDragEnd={this.onDragEnd}>
+                    <DragDropContext onDragEnd={onDragEnd}>
                         <div className='bg-custom-primary min-h-screen py-4 px-4 md:px-8 pt-4'>
                             <div className='w-90% flex items-center mb-4'>
                                 <Link to={'/tugas'}>
@@ -182,21 +228,21 @@ class Game1 extends Component {
                                     </button>
                                 </Link>
                             </div>
-                            <h1 className='text-white'>1. Lengkapi kotak dibawah dengan huruf hijaiyah : <b>Ba Ta Ta</b></h1>
+                            <h1 className='text-white'>{location.state.data.kalimat_soal} <strong>{Object.keys(state.data).map(e => `${digitsBeGone(e)} `)}</strong></h1>
                             <div className='w-full flex justify-end'>
-                                {this.state.modalBank ? '' : (<button className='bg-custom-green-primary text-white px-2 py-1 mt-4 rounded shadow-custom-shadow-green' onClick={() => this.openBank()}>Bank Data</button>)}
+                                {modalBank ? '' : (<button className='bg-custom-green-primary text-white px-2 py-1 mt-4 rounded shadow-custom-shadow-green' onClick={() => openBank()}>Bank Data</button>)}
                             </div>
-                            {this.state.modalBank ? (
+                            {modalBank ? (
                                 <Droppable droppableId="ITEMS" isDropDisabled={true}>
                                     {(provided, snapshot) => (
                                         <div className='w-full bg-custom-secondary p-2 mt-4 rounded shadow-custom-shadow-gray'>
                                             <div className='flex justify-end'>
-                                                <button className='w-fit bg-custom-secondary text-xs text-white py-1 px-2 font-bold border-2 border-white rounded' onClick={() => this.closeBank()}>
+                                                <button className='w-fit bg-custom-secondary text-xs text-white py-1 px-2 font-bold border-2 border-white rounded' onClick={() => closeBank()}>
                                                     X
                                                 </button>
                                             </div>
                                             <div as='bank' className={`w-full flex justify-around mt-2`} ref={provided.innerRef}>
-                                                {ITEMS.map((item, index) => (
+                                                {dataBank.map((item, index) => (
                                                     <Draggable
                                                         key={item.id}
                                                         draggableId={item.id}
@@ -208,7 +254,7 @@ class Game1 extends Component {
                                                                     {...provided.dragHandleProps}
                                                                     src={item.content}
                                                                     alt={item.huruf}
-                                                                    className='w-15% h-auto select-none p-2 mb-2 rounded'
+                                                                    className='w-24 h-24 bg-white select-none p-2 mb-2 rounded'
                                                                 />
                                                                 {snapshot.isDragging && (
                                                                     <img src={item.content} alt={item.huruf} className='clone !transform-none' />
@@ -224,13 +270,13 @@ class Game1 extends Component {
                             ) : ""}
 
                             <div as='Content' className='flex justify-center mt-4'>
-                                {Object.keys(this.state.data).map((list, i) => (
+                                {Object.keys(state.data).map((list, i) => (
                                     <Droppable key={list} droppableId={list}>
                                         {(provided, snapshot) => (
-                                            <div as='Container' className={`w-31% min-h-custom-min-height m-2 bg-white p-2 rounded flex justify-center border-2 border-dashed border-black`}
+                                            <div as='Container' className={`w-31% min-h-custom-min-height m-2 bg-white p-2 rounded flex justify-center border-2 border-dashed ${generateColorBorder(list)}`}
                                                 ref={provided.innerRef}>
-                                                {this.state.data[list].length
-                                                    ? this.state.data[list].map(
+                                                {state.data[list].length
+                                                    ? state.data[list].map(
                                                         (item, index) => (
                                                             <Draggable
                                                                 key={item.id}
@@ -242,7 +288,7 @@ class Game1 extends Component {
                                                                         {...provided.dragHandleProps}
                                                                         src={item.content}
                                                                         alt={item.huruf}
-                                                                        className='w-1/2 h-auto select-none p-2 mb-2 rounded'
+                                                                        className='w-24 h-24 select-none p-2 mb-2 rounded'
                                                                     />
                                                                 )}
                                                             </Draggable>
@@ -256,64 +302,10 @@ class Game1 extends Component {
                                 ))}
                             </div>
                             <div className='w-full flex mt-4'>
-                                <button className='bg-custom-secondary text-white px-3 py-1 rounded-md shadow-click' onClick={() => this.checkAnswer(this.state.data)}>
+                                <button className='bg-custom-secondary text-white px-3 py-1 rounded-md shadow-click' onClick={() => checkAnswer(state.data)}>
                                     Check
                                 </button>
                             </div>
-
-                            <Transition appear show={this.state.modal} as={Fragment}>
-                                <Dialog
-                                    as="div"
-                                    className="fixed inset-0 z-10 overflow-y-auto"
-                                    onClose={() => this.closeModal()}
-                                >
-                                    <div className="min-h-screen px-4 text-center">
-                                        <Transition.Child
-                                            as={Fragment}
-                                            enter="ease-out duration-300"
-                                            enterFrom="opacity-0"
-                                            enterTo="opacity-100"
-                                            leave="ease-in duration-200"
-                                            leaveFrom="opacity-100"
-                                            leaveTo="opacity-0"
-                                        >
-                                            <Dialog.Overlay className="fixed inset-0 bg-black opacity-50" />
-                                        </Transition.Child>
-
-                                        {/* This element is to trick the browser into centering the modal contents. */}
-                                        <span
-                                            className="inline-block h-screen align-middle"
-                                            aria-hidden="true"
-                                        >
-                                            &#8203;
-                                        </span>
-                                        <Transition.Child
-                                            as={Fragment}
-                                            enter="ease-out duration-300"
-                                            enterFrom="opacity-0 scale-95"
-                                            enterTo="opacity-100 scale-100"
-                                            leave="ease-in duration-200"
-                                            leaveFrom="opacity-100 scale-100"
-                                            leaveTo="opacity-0 scale-95"
-                                        >
-                                            <div className="inline-block w-full max-w-sm my-8 overflow-hidden text-left align-middle transition-all transform bg-custom-secondary shadow-xl rounded-2xl py-10">
-                                                <div className='!absolute '>
-                                                    <Lottie width={375} height={200} options={defaultOptions2} />
-                                                </div>
-                                                <Dialog.Title as="h3" className="text-lg font-custom-font font-medium leading-6 text-white text-center">
-                                                    Score Game
-                                                </Dialog.Title>
-                                                <div className="mt-4 flex justify-between items-center">
-                                                    <img src="/ilustrasi_modal1.svg" alt="icon" />
-                                                    <h2 className='text-white text-6xl p-4 bg-custom-dark rounded-full'>{(~~(100 / Object.keys(this.state.data).length) * this.state.score)}</h2>
-                                                    <img src="/ilustrasi_modal2.svg" alt="icon" />
-                                                </div>
-                                            </div>
-                                        </Transition.Child>
-                                    </div>
-                                </Dialog>
-                            </Transition>
-
                         </div>
                     </DragDropContext >
                 </Orientation>
@@ -324,9 +316,13 @@ class Game1 extends Component {
                     </div>
                 </Orientation>
             </DeviceOrientation>
+        </>
 
-        ) : (
-            <DragDropContext onDragEnd={this.onDragEnd}>
+    ) : (
+
+        <>
+            <Toaster />
+            <DragDropContext onDragEnd={onDragEnd}>
                 <div className='bg-custom-primary min-h-screen px-4 md:px-8 lg:px-25% pt-4'>
                     <div className='w-90% flex items-center mb-4'>
                         <Link to={'/tugas'}>
@@ -335,21 +331,21 @@ class Game1 extends Component {
                             </button>
                         </Link>
                     </div>
-                    <h1 className='text-white text-lg'>1. Lengkapi kotak dibawah dengan huruf hijaiyah : <b>Ba Ta Ta</b></h1>
+                    <h1 className='text-white text-lg'> {location.state.data.kalimat_soal} <strong>{Object.keys(state.data).map(e => `${digitsBeGone(e)} `)}</strong></h1>
                     <div className='w-full flex justify-end'>
-                        {this.state.modalBank ? '' : (<button className='bg-custom-green-primary text-white px-2 py-1 mt-4 rounded shadow-custom-shadow-green' onClick={() => this.openBank()}>Bank Data</button>)}
+                        {modalBank ? '' : (<button className='bg-custom-green-primary text-white px-2 py-1 mt-4 rounded shadow-custom-shadow-green' onClick={() => openBank()}>Bank Data</button>)}
                     </div>
-                    {this.state.modalBank ? (
+                    {modalBank ? (
                         <Droppable droppableId="ITEMS" isDropDisabled={true}>
                             {(provided, snapshot) => (
                                 <div className='w-full bg-custom-secondary p-2 mt-4 rounded shadow-custom-shadow-gray'>
                                     <div className='flex justify-end'>
-                                        <button className='w-fit bg-custom-secondary text-xs text-white py-1 px-2 font-bold border-2 border-white rounded' onClick={() => this.closeBank()}>
+                                        <button className='w-fit bg-custom-secondary text-xs text-white py-1 px-2 font-bold border-2 border-white rounded' onClick={() => closeBank()}>
                                             X
                                         </button>
                                     </div>
                                     <div as='bank' className={`w-full flex justify-around mt-2`} ref={provided.innerRef}>
-                                        {ITEMS.map((item, index) => (
+                                        {dataBank.map((item, index) => (
                                             <Draggable
                                                 key={item.id}
                                                 draggableId={item.id}
@@ -361,7 +357,7 @@ class Game1 extends Component {
                                                             {...provided.dragHandleProps}
                                                             src={item.content}
                                                             alt={item.huruf}
-                                                            className='w-15% h-auto select-none p-2 mb-2 rounded'
+                                                            className='w-24 h-24 bg-white select-none p-2 mb-2 rounded'
                                                         />
                                                         {snapshot.isDragging && (
                                                             <img src={item.content} alt={item.huruf} className='clone !transform-none' />
@@ -377,13 +373,13 @@ class Game1 extends Component {
                     ) : ""}
 
                     <div as='Content' className='flex justify-center mt-4'>
-                        {Object.keys(this.state.data).map((list, i) => (
+                        {Object.keys(state.data).map((list, i) => (
                             <Droppable key={list} droppableId={list}>
                                 {(provided, snapshot) => (
-                                    <div as='Container' className={`w-31% min-h-custom-min-height m-2 bg-white p-2 rounded flex justify-center border-2 border-dashed border-black`}
+                                    <div as='Container' className={`w-31% min-h-custom-min-height m-2 bg-white p-2 rounded flex justify-center border-2 border-dashed ${generateColorBorder(list)} `}
                                         ref={provided.innerRef}>
-                                        {this.state.data[list].length
-                                            ? this.state.data[list].map(
+                                        {state.data[list].length
+                                            ? state.data[list].map(
                                                 (item, index) => (
                                                     <Draggable
                                                         key={item.id}
@@ -395,7 +391,7 @@ class Game1 extends Component {
                                                                 {...provided.dragHandleProps}
                                                                 src={item.content}
                                                                 alt={item.huruf}
-                                                                className='w-1/2 h-auto select-none p-2 mb-2 rounded'
+                                                                className='w-24 h-24 select-none p-2 mb-2 rounded'
                                                             />
                                                         )}
                                                     </Draggable>
@@ -409,68 +405,14 @@ class Game1 extends Component {
                         ))}
                     </div>
                     <div className='w-full flex mt-4'>
-                        <button className='bg-custom-secondary text-white px-3 py-1 rounded-md shadow-click' onClick={() => this.checkAnswer(this.state.data)}>
+                        <button className='bg-custom-secondary text-white px-3 py-1 rounded-md shadow-click' onClick={() => checkAnswer(state.data)}>
                             Check
                         </button>
                     </div>
-
-                    <Transition appear show={this.state.modal} as={Fragment}>
-                        <Dialog
-                            as="div"
-                            className="fixed inset-0 z-10 overflow-y-auto"
-                            onClose={() => this.closeModal()}
-                        >
-                            <div className="min-h-screen px-4 text-center">
-                                <Transition.Child
-                                    as={Fragment}
-                                    enter="ease-out duration-300"
-                                    enterFrom="opacity-0"
-                                    enterTo="opacity-100"
-                                    leave="ease-in duration-200"
-                                    leaveFrom="opacity-100"
-                                    leaveTo="opacity-0"
-                                >
-                                    <Dialog.Overlay className="fixed inset-0 bg-black opacity-50" />
-                                </Transition.Child>
-                                {/* This element is to trick the browser into centering the modal contents. */}
-                                <span
-                                    className="inline-block h-screen align-middle"
-                                    aria-hidden="true"
-                                >
-                                    &#8203;
-                                </span>
-                                <Transition.Child
-                                    as={Fragment}
-                                    enter="ease-out duration-300"
-                                    enterFrom="opacity-0 scale-95"
-                                    enterTo="opacity-100 scale-100"
-                                    leave="ease-in duration-200"
-                                    leaveFrom="opacity-100 scale-100"
-                                    leaveTo="opacity-0 scale-95"
-                                >
-                                    <div className="inline-block w-full max-w-sm my-8 overflow-hidden text-left align-middle transition-all transform bg-custom-secondary shadow-xl rounded-2xl py-10">
-                                        <div className='!absolute '>
-                                            <Lottie width={375} height={200} options={defaultOptions2} />
-                                        </div>
-
-                                        <Dialog.Title as="h3" className="text-lg font-custom-font font-medium leading-6 text-white text-center">
-                                            Score Game
-                                        </Dialog.Title>
-                                        <div className="mt-4 flex justify-between items-center">
-                                            <img src="/ilustrasi_modal1.svg" alt="icon" />
-                                            <h2 className='text-white text-6xl p-4 bg-custom-dark rounded-full'>{(~~(100 / Object.keys(this.state.data).length) * this.state.score)}</h2>
-                                            <img src="/ilustrasi_modal2.svg" alt="icon" />
-                                        </div>
-                                    </div>
-                                </Transition.Child>
-                            </div>
-                        </Dialog>
-                    </Transition>
-
                 </div>
             </DragDropContext >
-        );
-    }
+        </>
+    );
 }
 
 export default Game1;
