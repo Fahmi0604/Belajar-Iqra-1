@@ -20,7 +20,7 @@ function DetailTugas() {
   useEffect(() => {
     SoalService.getSoalByIdTugas(uid).then(
       (response) => {
-        setNamaTugas(response.data.data[0].nama_tugas);
+        setNamaTugas(response.data.data.length ? response.data.data[0].nama_tugas : '');
         setdataSoal(response.data.data);
       },
       (error) => {
@@ -34,10 +34,6 @@ function DetailTugas() {
       }
     );
   }, [history, uid]);
-
-  useEffect(() => {
-    console.log(dataSoal);
-  }, [dataSoal])
 
   const getAllSoal = () => {
     SoalService.getSoalByIdTugas(uid).then(

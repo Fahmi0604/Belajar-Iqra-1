@@ -31,8 +31,8 @@ function Login() {
                 Create account
               </h1>
               <Label>
-                <span>Email</span>
-                <Input className="mt-1" type="email" placeholder="john@doe.com" />
+                <span>Username</span>
+                <Input className="mt-1" type="text" placeholder="john@doe.com" />
               </Label>
               <Label className="mt-4">
                 <span>Password</span>

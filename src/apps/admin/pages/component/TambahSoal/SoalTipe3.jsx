@@ -55,9 +55,9 @@ export default function SoalTipe3(props) {
         p5.background(255);
 
         (props.lines.length > 0) && props.lines.forEach((p, index) => {
-            if ((index % 3) > 0) {
-                plot(p5, 222, 160, p.x, p.y);
-            }
+            // if ((index % 3) > 0) {
+            plot(p5, 222, 160, p.x, p.y);
+            // }
         });
 
         (props.dot.length > 0) && props.dot.forEach((p, index) => {
@@ -71,7 +71,7 @@ export default function SoalTipe3(props) {
         } else {
             p5.stroke(50);
         }
-        p5.strokeWeight(15);
+        p5.strokeWeight(5);
         p5.line(line.px, line.py, line.x, line.y);
     }
 
@@ -82,7 +82,7 @@ export default function SoalTipe3(props) {
     const plot = (p5, fillColor, strokeColor, x, y) => {
         p5.fill(fillColor);
         // p5.stroke(strokeColor);
-        p5.strokeWeight(3);
+        p5.strokeWeight(5);
         p5.ellipse(x, y, 1);
     }
 

@@ -10,19 +10,20 @@ import UserService from '../services/user.service'
 import toast, { Toaster } from 'react-hot-toast';
 
 function Login() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const history = useHistory();
 
   const handleLogin = async () => {
     try {
-      await AuthService.login(email, password).then(
+      await AuthService.login(username, password).then(
         (res) => {
+          console.log(res);
           toast.success('Berhasil Login', { position: 'bottom-center' });
 
           UserService.getUserById(res.uid).then(response => {
-            if (response.data.data.role === '2') {
+            if (response.data.data.role === '1') {
               history.push("/app/dashboard");
               setTimeout(() => {
                 window.location.reload();
@@ -35,7 +36,7 @@ function Login() {
             }
           });
 
-          return res
+          // return res
         },
         (error) => {
           console.log(error);
@@ -70,8 +71,8 @@ function Login() {
             <div className="w-full">
               <h1 className="mb-4 text-xl font-semibold text-gray-700 dark:text-gray-200">Login</h1>
               <Label>
-                <span>Email</span>
-                <Input className="mt-1" type="email" placeholder="john@gmail.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+                <span>Username</span>
+                <Input className="mt-1" type="text" placeholder="john@gmail.com" value={username} onChange={(e) => setUsername(e.target.value)} />
               </Label>
 
               <Label className="mt-4">

@@ -5,6 +5,7 @@ import AuthService from './services/auth.service'
 
 const Layout = lazy(() => import('./containers/Layout'))
 const Login = lazy(() => import('./pages/Login'))
+const Splash = lazy(() => import('./pages/Splash'))
 const CreateAccount = lazy(() => import('./pages/CreateAccount'))
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 
@@ -60,7 +61,9 @@ function App() {
       <Router>
         <AccessibleNavigationAnnouncer />
         <Switch>
-          <Route path="/login" component={Login} />
+          <Route path="/splash" component={Splash} />
+          <Route path="/login_admin" component={Login} />
+          <Route path="/login_user" component={Login} />
           <Route path="/create-account" component={CreateAccount} />
           <Route path="/forgot-password" component={ForgotPassword} />
 
@@ -80,7 +83,7 @@ function App() {
           })}
 
           {/* If you have an index page, you can remothis Redirect */}
-          <Redirect exact from="/" to="/login" />
+          <Redirect exact from="/" to="/splash" />
           <Route path="*" component={Login} />
         </Switch>
       </Router>

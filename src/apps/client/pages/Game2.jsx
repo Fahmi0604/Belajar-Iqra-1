@@ -3,7 +3,7 @@ import { v4 } from 'uuid';
 import { Link, useLocation, useHistory } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Dialog, Transition } from '@headlessui/react'
-import { ChevronLeftIcon, PlayIcon } from '@heroicons/react/solid'
+import { ChevronLeftIcon, PlayIcon, PauseIcon } from '@heroicons/react/solid'
 import { isMobile } from 'react-device-detect';
 import DeviceOrientation, { Orientation } from 'react-screen-orientation'
 import Lottie from 'react-lottie';
@@ -64,6 +64,10 @@ const Game2 = () => {
     });
     const [modalBank, setModalBank] = useState(false);
     const [dataBank, setDataBank] = useState([]);
+    // variabel untuk mengeset apakah soal sudah terjawab sebelumnya
+    const [answered, setAnswered] = useState(false);
+    const [audio, setAudio] = useState('');
+    const [isPlaying, setIsPlaying] = useState(false);
 
     useEffect(() => {
         // digunakan untuk setData awal soal dan bank
@@ -74,11 +78,17 @@ const Game2 = () => {
                 data: location.state.data.data_soal,
             }));
             setDataBank(location.state.data.data_bank);
+            setAudio(new Audio(location.state.data.data_tambahan));
         }
 
     }, [location]);
 
     useEffect(() => {
+        getAllAnswer();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [location]);
+
+    const getAllAnswer = () => {
         const user = AuthService.getCurrentUser();
 
         if (user) {
@@ -86,6 +96,7 @@ const Game2 = () => {
                 .then(res => {
                     if (res.data.success) {
                         const answer = JSON.parse(res.data.data.jawab);
+                        setAnswered(true);
                         setState(prev => ({
                             ...prev,
                             data: {
@@ -101,10 +112,9 @@ const Game2 = () => {
                         navigate("/login");
                         window.location.reload();
                     }
-                })
+                });
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [location])
+    }
 
     const onDragEnd = (result) => {
         const { source, destination } = result;
@@ -179,7 +189,8 @@ const Game2 = () => {
             JawabanService.createJawaban({ id_user: user.uid, id_soal: location.state.data.id_soal, jawab: JSON.stringify(data), nilai: arr })
                 .then(res => {
                     console.log(res);
-                    toast.success('data berhasil disimpan', { position: 'bottom-center' })
+                    toast.success('data berhasil disimpan', { position: 'bottom-center' });
+                    getAllAnswer();
                 }, (error) => {
                     console.log("Private page", error.response);
                     // Invalid token
@@ -197,7 +208,7 @@ const Game2 = () => {
     // digunakan untuk meng genarate warna border berdasarkan jawaban (benas/salah)
     const generateColorBorder = (key) => {
         // cek apakah sudah di jawab apa tidak
-        if (state.data[key].length) {
+        if (state.data[key].length && answered) {
             // cek apakah jawaban user sesuai dengan soal (benar/salah)
             if (state.data[key][0].huruf === digitsBeGone(key)) {
                 return 'border-custom-green-primary'
@@ -210,11 +221,18 @@ const Game2 = () => {
     }
 
     const playAudio = () => {
-        if (location.state.data) {
-            new Audio(location.state.data.data_tambahan).play();
+        if (audio !== '') {
+            audio.play();
+            setIsPlaying(true);
         }
     }
 
+    const pauseAudio = () => {
+        if (audio !== '') {
+            audio.pause();
+            setIsPlaying(false);
+        }
+    }
 
     const navigate = (route) => {
         history.push(route);
@@ -235,7 +253,9 @@ const Game2 = () => {
                                 </Link>
                             </div>
                             <h1 className='text-white'>{location.state.data.kalimat_soal}</h1>
-                            <button onClick={playAudio}><PlayIcon className='w-10 h-10 text-white' /></button>
+                            {isPlaying ? (<button onClick={playAudio}><PlayIcon className='w-10 h-10 text-white' /></button>)
+                                : (<button onClick={pauseAudio}><PauseIcon className='w-10 h-10 text-white' /></button>)
+                            }
 
                             <div className='w-full flex justify-end'>
                                 {modalBank ? '' : (<button className='bg-custom-green-primary text-white px-2 py-1 mt-4 rounded shadow-custom-shadow-green' onClick={() => openBank()}>Bank Data</button>)}
@@ -253,6 +273,7 @@ const Game2 = () => {
                                                 {dataBank.map((item, index) => (
                                                     <Draggable
                                                         key={item.id}
+                                                        isDragDisabled={answered}
                                                         draggableId={item.id}
                                                         index={index}>
                                                         {(provided, snapshot) => (
@@ -288,6 +309,7 @@ const Game2 = () => {
                                                         (item, index) => (
                                                             <Draggable
                                                                 key={item.id}
+                                                                isDragDisabled={answered}
                                                                 draggableId={item.id}
                                                                 index={index}>
                                                                 {(provided, snapshot) => (
@@ -310,7 +332,7 @@ const Game2 = () => {
                                 ))}
                             </div>
                             <div className='w-full flex mt-4'>
-                                <button className='bg-custom-secondary text-white px-3 py-1 rounded-md shadow-click' onClick={() => checkAnswer(state.data)}>
+                                <button className='bg-custom-secondary text-white px-3 py-1 rounded-md shadow-click' onClick={() => checkAnswer(state.data)} disabled={answered}>
                                     Check
                                 </button>
                             </div>
@@ -340,7 +362,8 @@ const Game2 = () => {
                         </Link>
                     </div>
                     <h1 className='text-white text-lg'> {location.state.data.kalimat_soal}</h1>
-                    <button onClick={playAudio}><PlayIcon className='w-10 h-10 text-white' /></button>
+                    {isPlaying ? (<button onClick={pauseAudio}><PauseIcon className='w-10 h-10 text-white' /></button>) : (<button onClick={playAudio}><PlayIcon className='w-10 h-10 text-white' /></button>)
+                    }
 
                     <div className='w-full flex justify-end'>
                         {modalBank ? '' : (<button className='bg-custom-green-primary text-white px-2 py-1 mt-4 rounded shadow-custom-shadow-green' onClick={() => openBank()}>Bank Data</button>)}
@@ -358,6 +381,7 @@ const Game2 = () => {
                                         {dataBank.map((item, index) => (
                                             <Draggable
                                                 key={item.id}
+                                                isDragDisabled={answered}
                                                 draggableId={item.id}
                                                 index={index}>
                                                 {(provided, snapshot) => (
@@ -393,6 +417,7 @@ const Game2 = () => {
                                                 (item, index) => (
                                                     <Draggable
                                                         key={item.id}
+                                                        isDragDisabled={answered}
                                                         draggableId={item.id}
                                                         index={index}>
                                                         {(provided, snapshot) => (
@@ -415,7 +440,7 @@ const Game2 = () => {
                         ))}
                     </div>
                     <div className='w-full flex mt-4'>
-                        <button className='bg-custom-secondary text-white px-3 py-1 rounded-md shadow-click' onClick={() => checkAnswer(state.data)}>
+                        <button className='bg-custom-secondary text-white px-3 py-1 rounded-md shadow-click' onClick={() => checkAnswer(state.data)} disabled={answered}>
                             Check
                         </button>
                     </div>

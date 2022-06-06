@@ -31,7 +31,7 @@ function ForgotPassword() {
               </h1>
 
               <Label>
-                <span>Email</span>
+                <span>Username</span>
                 <Input className="mt-1" placeholder="Jane Doe" />
               </Label>
 

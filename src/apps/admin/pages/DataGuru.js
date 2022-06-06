@@ -70,7 +70,7 @@ function Tables() {
 
   function closeModalCreate() {
     resetField('nama');
-    resetField('email');
+    resetField('username');
     resetField('password');
     setModalCreate(false);
   }
@@ -78,7 +78,7 @@ function Tables() {
   function openModalUpdate(id) {
     setValue2('id_user', id);
     setValue2('edit_nama', dataTable.filter(e => e.id_user === id).map(e => e.nama));
-    setValue2('edit_email', dataTable.filter(e => e.id_user === id).map(e => e.email));
+    setValue2('edit_username', dataTable.filter(e => e.id_user === id).map(e => e.username));
     setModalUpdate(true);
   }
 
@@ -154,7 +154,7 @@ function Tables() {
     const sendData = {
       id_user: data.id_user,
       nama: data.edit_nama,
-      email: data.edit_email,
+      username: data.edit_username,
     }
 
     console.log(data);
@@ -212,7 +212,7 @@ function Tables() {
             <tr>
               <TableCell>Foto</TableCell>
               <TableCell>Nama</TableCell>
-              <TableCell>Email</TableCell>
+              <TableCell>Username</TableCell>
               <TableCell>Terakhir Login</TableCell>
               <TableCell>Actions</TableCell>
             </tr>
@@ -239,7 +239,7 @@ function Tables() {
                     <span className='text-sm'>{user.nama}</span>
                   </TableCell>
                   <TableCell>
-                    <span className='text-sm'>{user.email}</span>
+                    <span className='text-sm'>{user.username}</span>
                   </TableCell>
                   <TableCell>
                     <span className='text-sm'>
@@ -289,23 +289,23 @@ function Tables() {
               )}
 
               <Label className='mt-2'>
-                <span>Email</span>
+                <span>Username</span>
                 <Input
-                  {...register("email", {
-                    required: 'Email is required',
+                  {...register("username", {
+                    required: 'Username is required',
                     pattern: {
                       value:
                         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-                      message: "Please enter a valid email",
+                      message: "Please enter a valid username",
                     },
                   })}
-                  type='email'
-                  placeholder='Masukan Email'
+                  type='text'
+                  placeholder='Masukan Username'
                   className='mt-2'
                 />
               </Label>
-              {errors.email?.message && (
-                <HelperText valid={false}>{errors.email?.message}</HelperText>
+              {errors.username?.message && (
+                <HelperText valid={false}>{errors.username?.message}</HelperText>
               )}
 
               <Label className='mt-2'>
@@ -366,23 +366,23 @@ function Tables() {
               )}
 
               <Label className='mt-2'>
-                <span>Email</span>
+                <span>Username</span>
                 <Input
-                  {...register2("edit_email", {
-                    required: 'Email is required',
+                  {...register2("edit_username", {
+                    required: 'Username is required',
                     pattern: {
                       value:
                         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-                      message: "Please enter a valid email",
+                      message: "Please enter a valid username",
                     },
                   })}
-                  type='email'
-                  placeholder='Masukan Email'
+                  type='text'
+                  placeholder='Masukan Username'
                   className='mt-2'
                 />
               </Label>
-              {errors2.edit_email?.message && (
-                <HelperText valid={false}>{errors2.edit_email?.message}</HelperText>
+              {errors2.edit_username?.message && (
+                <HelperText valid={false}>{errors2.edit_username?.message}</HelperText>
               )}
 
             </div>

@@ -17,8 +17,9 @@
 
   .clone,
   .clone ~ img {
-    width: 15%;
-    height: auto;
+    width: 6rem;
+    height: 6rem;
+    background: #fff;
     user-select: none;
     padding: 0.5rem;
     margin-bottom: 0.5rem;
@@ -26,4 +27,65 @@
     /* background-color: white; */
     transform: none !important;
   }
+
+  /* stampel kotak */
+  .rubber {
+    box-shadow: 0 0 0 3px rgb(224, 36, 36), 0 0 0 2px rgb(224, 36, 36) inset;
+    border: 2px solid transparent;
+    /* border-radius: 1000px; */
+    padding: 1rem;
+    line-height: 22px;
+    color: rgba(224, 36, 36, 0.4);
+    background-color: #ffffff;
+    font-size: 24px;
+    text-transform: uppercase;
+    text-align: center;
+    /* opacity: 0.4; */
+    transform: rotate(-5deg);
+  }
+
+  /* stampel bulat */
+  .COGfirst {
+    position: relative;
+    /* width: 100px;
+    height: 100px; */
+  }
+  .COGfirst div:nth-of-type(1) {
+    /* -webkit-transform: rotate(30deg); */
+    transform: rotate(23deg);
+  }
+  .COGfirst div:nth-of-type(2) {
+    /* -webkit-transform: rotate(60deg); */
+    transform: rotate(46deg);
+  }
+  .COGfirst div:nth-of-type(3) {
+    /* -webkit-transform: rotate(90deg); */
+    transform: rotate(69deg);
+  }
+  .COGfirst div:nth-of-type(4) {
+    /* -webkit-transform: rotate(90deg); */
+    transform: rotate(92deg);
+  }
+
+  .COGfirst .firstPart {
+    /* width: 100px; */
+    border-radius: 1px;
+    position: absolute;
+    /* height: 100px; */
+    /* background: rgba(240, 82, 82, 1); */
+    background: #ff4242;
+  }
+  .COGfirst .firstHole {
+    /* box-shadow: 0 0 0 2px rgb(224, 36, 36) inset; */
+    /* width: 100px;
+    height: 100px; */
+    border-radius: 100%;
+    background: white;
+    position: absolute;
+    /* padding: 3rem; */
+    outline: 4px solid #ff4242;
+    outline-offset: -10px;
+    transform: rotate(15deg);
+  }
+
 }

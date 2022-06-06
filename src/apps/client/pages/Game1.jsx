@@ -64,11 +64,13 @@ const Game1 = () => {
     });
     const [modalBank, setModalBank] = useState(false);
     const [dataBank, setDataBank] = useState([]);
+    // variabel untuk mengeset apakah soal sudah terjawab sebelumnya
+    const [answered, setAnswered] = useState(false);
 
     useEffect(() => {
         // digunakan untuk setData awal soal dan bank
         if (location.state) {
-            console.log(location.state);
+            // console.log(location.state);
             setState(prev => ({
                 ...prev,
                 data: location.state.data.data_soal,
@@ -79,6 +81,11 @@ const Game1 = () => {
     }, [location]);
 
     useEffect(() => {
+        getAllAnswer();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [location])
+
+    const getAllAnswer = () => {
         const user = AuthService.getCurrentUser();
 
         if (user) {
@@ -86,7 +93,7 @@ const Game1 = () => {
                 .then(res => {
                     if (res.data.success) {
                         const answer = JSON.parse(res.data.data.jawab);
-                        console.log(answer);
+                        setAnswered(true);
                         setState(prev => ({
                             ...prev,
                             data: {
@@ -102,10 +109,9 @@ const Game1 = () => {
                         navigate("/login");
                         window.location.reload();
                     }
-                })
+                });
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [location])
+    }
 
     const onDragEnd = (result) => {
         const { source, destination } = result;
@@ -180,7 +186,8 @@ const Game1 = () => {
             JawabanService.createJawaban({ id_user: user.uid, id_soal: location.state.data.id_soal, jawab: JSON.stringify(data), nilai: arr })
                 .then(res => {
                     console.log(res);
-                    toast.success('data berhasil disimpan', { position: 'bottom-center' })
+                    toast.success('data berhasil disimpan', { position: 'bottom-center' });
+                    getAllAnswer();
                 }, (error) => {
                     console.log("Private page", error.response);
                     // Invalid token
@@ -198,7 +205,7 @@ const Game1 = () => {
     // digunakan untuk meng genarate warna border berdasarkan jawaban (benas/salah)
     const generateColorBorder = (key) => {
         // cek apakah sudah di jawab apa tidak
-        if (state.data[key].length) {
+        if (state.data[key].length && answered) {
             // cek apakah jawaban user sesuai dengan soal (benar/salah)
             if (state.data[key][0].huruf === digitsBeGone(key)) {
                 return 'border-custom-green-primary'
@@ -245,6 +252,7 @@ const Game1 = () => {
                                                 {dataBank.map((item, index) => (
                                                     <Draggable
                                                         key={item.id}
+                                                        isDragDisabled={answered}
                                                         draggableId={item.id}
                                                         index={index}>
                                                         {(provided, snapshot) => (
@@ -280,6 +288,7 @@ const Game1 = () => {
                                                         (item, index) => (
                                                             <Draggable
                                                                 key={item.id}
+                                                                isDragDisabled={answered}
                                                                 draggableId={item.id}
                                                                 index={index}>
                                                                 {(provided, snapshot) => (
@@ -302,7 +311,7 @@ const Game1 = () => {
                                 ))}
                             </div>
                             <div className='w-full flex mt-4'>
-                                <button className='bg-custom-secondary text-white px-3 py-1 rounded-md shadow-click' onClick={() => checkAnswer(state.data)}>
+                                <button className='bg-custom-secondary text-white px-3 py-1 rounded-md shadow-click' onClick={() => checkAnswer(state.data)} disabled={answered}>
                                     Check
                                 </button>
                             </div>
@@ -348,6 +357,7 @@ const Game1 = () => {
                                         {dataBank.map((item, index) => (
                                             <Draggable
                                                 key={item.id}
+                                                isDragDisabled={answered}
                                                 draggableId={item.id}
                                                 index={index}>
                                                 {(provided, snapshot) => (
@@ -383,6 +393,7 @@ const Game1 = () => {
                                                 (item, index) => (
                                                     <Draggable
                                                         key={item.id}
+                                                        isDragDisabled={answered}
                                                         draggableId={item.id}
                                                         index={index}>
                                                         {(provided, snapshot) => (
@@ -405,7 +416,7 @@ const Game1 = () => {
                         ))}
                     </div>
                     <div className='w-full flex mt-4'>
-                        <button className='bg-custom-secondary text-white px-3 py-1 rounded-md shadow-click' onClick={() => checkAnswer(state.data)}>
+                        <button className='bg-custom-secondary text-white px-3 py-1 rounded-md shadow-click' onClick={() => checkAnswer(state.data)} disabled={answered}>
                             Check
                         </button>
                     </div>

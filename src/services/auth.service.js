@@ -2,10 +2,10 @@ import axios from "axios";
 
 const API_URL = "http://localhost:3001/api/users";
 
-const login = (email, password) => {
+const login = (username, password) => {
   return axios
     .post(API_URL + "/login", {
-      email,
+      username,
       password,
     })
     .then((response) => {

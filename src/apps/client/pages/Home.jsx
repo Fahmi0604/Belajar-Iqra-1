@@ -1,11 +1,27 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { UserIcon } from '@heroicons/react/solid'
 import { useHistory } from 'react-router-dom'
-
+import UserService from '../../../services/user.service';
+import AuthService from '../../../services/auth.service';
 
 export default function Home() {
 
     const history = useHistory();
+    const [currentUser, setCurrentUser] = useState()
+
+    useEffect(() => {
+        const user = AuthService.getCurrentUser();
+
+        if (user) {
+            UserService.getUserById(user.uid).then(res => {
+                console.log(res.data.data);
+                setCurrentUser(res.data.data);
+            }, (error => {
+                console.log(error);
+            }))
+        }
+    }, [])
+
 
     const navigate = (route) => {
         history.push(route);
@@ -17,12 +33,12 @@ export default function Home() {
                 {/* <img src="/iqra_logo.svg" alt="logo" /> */}
                 <button className='w-aut flex items-center justify-center' onClick={() => navigate('/profil')}>
                     <UserIcon className='w-8 h-8 bg-white p-1 text-gray-400 rounded border-2 border-solid border-gray-600' />
-                    <p className='font-custom-font text-sm font-semibold bg-white px-2 rounded-r text-gray-600'>User01</p>
+                    <p className='font-custom-font text-sm font-semibold bg-white px-2 rounded-r text-gray-600'>{currentUser && currentUser.nama}</p>
                 </button>
 
                 <div className='w-auto bg-white py-1 px-2 rounded-full flex items-center justify-center'>
                     <img className='w-5 h-5 mr-1' src="/Coin.svg" alt="coin" />
-                    <p className='font-custom-font text-base font-medium'>100</p>
+                    <p className='font-custom-font text-base font-medium'>{currentUser && currentUser.coin}</p>
                 </div>
 
             </div>
