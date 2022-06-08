@@ -56,7 +56,7 @@ function Login() {
             <div className="h-32 bg-custom-primary md:h-auto md:w-1/2">
               <img
                 aria-hidden="true"
-                className="object-cover w-full h-full dark:hidden"
+                className="object-cover w-full h-full"
                 src='/ilustrasi.svg'
                 alt="Office"
               />

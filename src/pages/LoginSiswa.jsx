@@ -11,7 +11,7 @@ export default function LoginSiswa() {
 
                     <div className='flex flex-wrap p-4'>
                         {[...Array(19)].map((e, i) =>
-                            <div key={i} className='flex w-47% p-2 bg-custom-secondary border-2 border-white rounded-md shadow-custom-shadow-gray text-custom-text text mb-3 mx-1.5% sm:w-31% sm:mb-4'>
+                            <div key={i} className='flex w-47% p-2 bg-custom-secondary border-2 border-white rounded-md shadow-custom-shadow-gray text-custom-text text mb-3 mx-1.5% sm:w-31% sm:mx-1% sm:mb-4'>
                                 <div className='w-1/4 flex justify-center items-center'>
                                     <img src={'/profil_laki.svg'} alt="profil" className='w-10 h-10 ' />
                                 </div>
@@ -30,7 +30,7 @@ export default function LoginSiswa() {
 
                     <div className='flex flex-wrap p-4'>
                         {[...Array(16)].map((e, i) =>
-                            <div key={i} className='flex w-47% p-2 bg-custom-secondary border-2 border-white rounded-md shadow-custom-shadow-gray text-custom-text text mb-3 mx-1.5% sm:w-31% sm:mb-4'>
+                            <div key={i} className='flex w-47% p-2 bg-custom-secondary border-2 border-white rounded-md shadow-custom-shadow-gray text-custom-text text mb-3 mx-1.5% sm:w-31% sm:mx-1% sm:mb-4'>
                                 <div className='w-1/4 flex justify-center items-center'>
                                     <img src={'/profil_laki.svg'} alt="profil" className='w-10 h-10 ' />
                                 </div>
