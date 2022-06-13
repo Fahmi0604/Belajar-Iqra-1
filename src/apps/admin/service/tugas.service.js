@@ -1,7 +1,8 @@
 import axios from "axios";
 import authHeader from "../../../services/auth-header";
+import URL from "../../../services/API_URL";
 
-const API_URL = "http://localhost:3001/api/tugas";
+const API_URL = URL + "/tugas";
 
 const createTugas = (data) => {
     return axios.post(API_URL + "/", data, { headers: authHeader() });

@@ -36,7 +36,7 @@ export default function Profil() {
                     if (res.data.success === 1) {
                         const jawaban = res.data.data;
                         console.log(jawaban);
-                        setDataJawaban(jawaban.slice((jawaban.length - 5), jawaban.length));
+                        setDataJawaban(jawaban.filter(f => f.id_user === user.uid).slice((jawaban.length - 5), jawaban.length));
                     }
                 }, (error) => {
                     console.log("Private page", error.response);
@@ -75,7 +75,7 @@ export default function Profil() {
 
     const logOut = () => {
         AuthService.logout();
-        history.push('/login');
+        history.push('/splash');
     }
 
     return (

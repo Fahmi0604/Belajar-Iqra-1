@@ -1,8 +1,9 @@
 import axios from "axios";
 import authHeader from "../../../services/auth-header";
 import authHeader2 from "../../../services/auth-header2";
+import URL from "../../../services/API_URL";
 
-const API_URL = "http://localhost:3001/api/soal";
+const API_URL = URL + "/soal";
 
 const createSoal = (data) => {
     return axios.post(API_URL + "/", data, { headers: authHeader() });

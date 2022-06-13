@@ -155,8 +155,10 @@ export default function Tugas() {
     }
 
     const generateStampNilai = (id_tugas) => {
+        const user = AuthService.getCurrentUser();
+
         const soalByTugas = dataSoalOri.filter(e => e.id_tugas === id_tugas);
-        const jawabanByTugas = dataJawaban.filter(e => e.id_tugas === id_tugas);
+        const jawabanByTugas = dataJawaban.filter(e => e.id_tugas === id_tugas && e.id_user === user.uid);
 
         const score = jawabanByTugas.filter(e => e.nilai === 1);
         // console.log(score);
