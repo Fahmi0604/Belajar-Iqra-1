@@ -44,14 +44,7 @@ function Game3() {
     const location = useLocation();
     const [guidePoints, setGuidePoints] = useState({
         garis: [
-            { id: 1, x: 255, y: 90 },
-            { id: 1, x: 250, y: 100 },
-            { id: 2, x: 250, y: 125 },
-            { id: 3, x: 250, y: 150 },
-            { id: 4, x: 250, y: 175 },
-            { id: 5, x: 250, y: 200 },
-            { id: 5, x: 250, y: 225 },
-            { id: 6, x: 245, y: 235 },
+
         ],
         titik: [
 
@@ -68,7 +61,7 @@ function Game3() {
         // digunakan untuk setData awal soal dan bank
         if (location.state) {
             console.log(location.state);
-            // setGuidePoints(location.state.data.data_tambahan);
+            setGuidePoints(location.state.data.data_tambahan);
         }
 
     }, [location]);
@@ -108,21 +101,21 @@ function Game3() {
 
         plotChecker()
 
-        if (Score.length === (guidePoints.garis.length + guidePoints.titik.length)) {
+        if (Score.length === (guidePoints.garis.length)) {
             p5.background(255)
             p5.stroke(90)
             p5.strokeWeight(10)
             p5.noFill()
             p5.beginShape()
             for (let i = 0; i < guidePoints.garis.length; i++) {
-                p5.vertex(guidePoints.garis[i].x, guidePoints.garis[i].y)
+                p5.curveVertex(guidePoints.garis[i].x, guidePoints.garis[i].y)
             }
             p5.endShape();
 
             for (let i = 0; i < guidePoints.titik.length; i++) {
                 p5.fill(90)
                 p5.noStroke()
-                p5.circle(guidePoints.titik[i].x, guidePoints.titik[i].y, 20);
+                p5.circle(guidePoints.titik[i].x, guidePoints.titik[i].y, 10);
             }
 
             p5.noLoop()
@@ -180,16 +173,16 @@ function Game3() {
                 }
             })
         })
-        guidePoints.titik.forEach(point => {
-            lines.forEach((line, index) => {
-                if ((line.x > (point.x - 15) && line.x < (point.x + 15)) && (line.y > (point.y - 15) && line.y < (point.y + 15))) {
-                    if (Score.includes(point) === false) {
-                        Score.push(point);
-                        console.log(Score);
-                    }
-                }
-            })
-        })
+        // guidePoints.titik.forEach(point => {
+        //     lines.forEach((line, index) => {
+        //         if ((line.x > (point.x - 15) && line.x < (point.x + 15)) && (line.y > (point.y - 15) && line.y < (point.y + 15))) {
+        //             if (Score.includes(point) === false) {
+        //                 Score.push(point);
+        //                 console.log(Score);
+        //             }
+        //         }
+        //     })
+        // })
     }
 
     const reportChange = useCallback((state, handle) => {

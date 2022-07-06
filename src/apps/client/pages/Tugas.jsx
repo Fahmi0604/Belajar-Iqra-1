@@ -163,7 +163,8 @@ export default function Tugas() {
         const score = jawabanByTugas.filter(e => e.nilai === 1);
         // console.log(score);
 
-        if (soalByTugas.length === jawabanByTugas.length) {
+        // if (soalByTugas.length === jawabanByTugas.length) {
+        if (jawabanByTugas.length === 10) {
             return (
                 <div className='w-full flex justify-end'>
                     {/* <div className='rubber absolute -mt-11'>100</div> */}

@@ -94,14 +94,14 @@ export default function LoginSiswa() {
 
                     <div className='flex flex-wrap p-4'>
                         {users.filter(f => f.kelas === 'A2').map((e, i) =>
-                            <div key={i} className='flex w-47% p-2 bg-custom-secondary border-2 border-white rounded-md shadow-custom-shadow-gray text-custom-text text mb-3 mx-1.5% sm:w-31% sm:mx-1% sm:mb-4'>
+                            <button onClick={() => handleLogin(e.username, e.username)} key={i} className='flex w-47% p-2 bg-custom-secondary border-2 border-white rounded-md shadow-custom-shadow-gray text-custom-text text mb-3 mx-1.5% sm:w-31% sm:mx-1% sm:mb-4'>
                                 <div className='w-1/4 flex justify-center items-center'>
                                     <img src={(e.jenis_kelamin === 'Laki-Laki') ? '/profil_laki.svg' : '/profil_perempuan.svg'} alt="profil" className='w-10 h-10' />
                                 </div>
                                 <div className='flex justify-center items-center w-3/4 text-white text-xl font-custom-font'>
                                     {e.nama}
                                 </div>
-                            </div>
+                            </button>
                         )}
                     </div>
                 </div>

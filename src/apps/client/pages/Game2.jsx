@@ -22,7 +22,6 @@ const defaultOptions = {
     rendererSettings: {
         preserveAspectRatio: "xMidYMid slice"
     },
-
 };
 
 const copy = (source, destination, droppableSource, droppableDestination) => {
@@ -253,8 +252,7 @@ const Game2 = () => {
                                 </Link>
                             </div>
                             <h1 className='text-white'>{location.state.data.kalimat_soal}</h1>
-                            {isPlaying ? (<button onClick={playAudio}><PlayIcon className='w-10 h-10 text-white' /></button>)
-                                : (<button onClick={pauseAudio}><PauseIcon className='w-10 h-10 text-white' /></button>)
+                            {isPlaying ? (<button onClick={pauseAudio}><PauseIcon className='w-10 h-10 text-white' /></button>) : (<button onClick={playAudio}><PlayIcon className='w-10 h-10 text-white' /></button>)
                             }
 
                             <div className='w-full flex justify-end'>

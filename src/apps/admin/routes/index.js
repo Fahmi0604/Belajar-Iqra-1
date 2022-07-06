@@ -8,9 +8,11 @@ const Charts = lazy(() => import('../../../pages/Charts'))
 const Buttons = lazy(() => import('../../../pages/Buttons'))
 const Modals = lazy(() => import('../../../pages/Modals'))
 const DataGuru = lazy(() => import('../pages/DataGuru'))
+const DataSiswa = lazy(() => import('../pages/DataSiswa'))
 const Page404 = lazy(() => import('../../../pages/404'))
 const Blank = lazy(() => import('../../../pages/Blank'))
 const DataTugas = lazy(() => import('../pages/DataTugas'))
+const DataNilai = lazy(() => import('../pages/DataNilai'))
 const TambahSoal = lazy(() => import('../pages/TambahSoal'))
 const EditSoal =lazy(() => import('../pages/EditSoal'))
 const DetailTugas = lazy(() => import( '../pages/DetailTugas'))
@@ -55,8 +57,16 @@ const routes = [
     component: DataGuru,
   },
   {
+    path: '/datasiswa',
+    component: DataSiswa,
+  },
+  {
     path: '/datatugas',
     component: DataTugas,
+  },
+  {
+    path: '/datanilai',
+    component: DataNilai,
   },
   {
     path: '/detailtugas/:uid',

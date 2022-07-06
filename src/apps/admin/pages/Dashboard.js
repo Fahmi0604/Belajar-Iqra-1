@@ -93,7 +93,7 @@ function Dashboard() {
         </InfoCard>
       </div>
 
-      <TableContainer>
+      {/* <TableContainer>
         <Table>
           <TableHeader>
             <tr>
@@ -136,7 +136,7 @@ function Dashboard() {
             onChange={onPageChange}
           />
         </TableFooter>
-      </TableContainer>
+      </TableContainer> */}
 
       <PageTitle>Charts</PageTitle>
       <div className="grid gap-6 mb-8 md:grid-cols-2">

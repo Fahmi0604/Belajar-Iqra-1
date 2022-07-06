@@ -12,34 +12,14 @@ const routes = [
     name: 'Dashboard', // name that appear in Sidebar
   },
   {
-    path: '/app/forms',
-    icon: 'FormsIcon',
-    name: 'Forms',
-  },
-  {
-    path: '/app/cards',
-    icon: 'CardsIcon',
-    name: 'Cards',
-  },
-  {
-    path: '/app/charts',
-    icon: 'ChartsIcon',
-    name: 'Charts',
-  },
-  {
-    path: '/app/buttons',
-    icon: 'ButtonsIcon',
-    name: 'Buttons',
-  },
-  {
-    path: '/app/modals',
-    icon: 'ModalsIcon',
-    name: 'Modals',
-  },
-  {
     path: '/app/dataguru',
     icon: 'UserIcon',
     name: 'Data Guru',
+  },
+  {
+    path: '/app/datasiswa',
+    icon: 'UserIcon',
+    name: 'Data Siswa',
   },
   {
     path: '/app/datatugas',
@@ -47,32 +27,10 @@ const routes = [
     name: 'Data Tugas',
   },
   {
-    icon: 'PagesIcon',
-    name: 'Pages',
-    routes: [
-      // submenu
-      {
-        path: '/login',
-        name: 'Login',
-      },
-      {
-        path: '/create-account',
-        name: 'Create account',
-      },
-      {
-        path: '/forgot-password',
-        name: 'Forgot password',
-      },
-      {
-        path: '/app/404',
-        name: '404',
-      },
-      {
-        path: '/app/blank',
-        name: 'Blank',
-      },
-    ],
-  },
+    path: '/app/datanilai',
+    icon: 'FormsIcon',
+    name: 'Data Nilai',
+  }
 ]
 
 export default routes
