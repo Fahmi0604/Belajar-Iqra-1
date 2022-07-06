@@ -16,8 +16,12 @@ const getUserById = (id) => {
   return axios.get(API_URL + `/${id}`, { headers: authHeader() });
 }
 
-const updateUser = (data) => {
-  return axios.put(API_URL + '/', data, { headers: authHeader()});
+const updateGuru = (data) => {
+  return axios.put(API_URL + '/update_guru', data, { headers: authHeader()});
+}
+
+const updateSiswa = (data) => {
+  return axios.put(API_URL + '/update_siswa', data, { headers: authHeader()});
 }
 
 const deleteUser = (data) => {
@@ -28,7 +32,8 @@ const userService = {
   getAllUsers,
   getUserById,
   createUser,
-  updateUser,
+  updateGuru,
+  updateSiswa,
   deleteUser,
 };
 

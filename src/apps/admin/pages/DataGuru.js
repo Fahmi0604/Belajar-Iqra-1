@@ -177,7 +177,7 @@ function Tables() {
     console.log(JSON.stringify(sendData));
     console.log(JSON.parse(JSON.stringify(sendData)));
 
-    UserService.updateUser(sendData).then(res => {
+    UserService.updateGuru(sendData).then(res => {
       getAllUsers();
       closeModalUpdate();
       toast.success('Data berhasil diedit', { position: 'bottom-center' });
@@ -226,7 +226,6 @@ function Tables() {
         <Table>
           <TableHeader>
             <tr>
-              <TableCell>No</TableCell>
               <TableCell>Nama</TableCell>
               <TableCell>Username</TableCell>
               <TableCell>Terakhir Login</TableCell>
@@ -236,9 +235,6 @@ function Tables() {
           <TableBody>
             {dataTable.map((user, i) => (
               <TableRow key={i}>
-                <TableCell>
-                  {i+1}
-                </TableCell>
                 <TableCell>
                   <span className='text-sm'>{user.nama}</span>
                 </TableCell>

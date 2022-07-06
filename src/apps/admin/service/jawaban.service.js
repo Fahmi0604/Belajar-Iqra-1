@@ -16,6 +16,10 @@ const getJawabanById = (data) => {
     return axios.get(API_URL + '/byid', { headers: authHeader(), params: data });
 }
 
+const deleteJawabanById = (data) => {
+    return axios.delete(API_URL + '/', { headers: authHeader(), data });
+}
+
 const jawabanService = {
     createJawaban,
     getAllJawaban,

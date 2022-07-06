@@ -26,6 +26,7 @@ import {
   ModalFooter,
   Label,
   Input,
+  Select,
   HelperText,
 } from "@windmill/react-ui";
 import { EditIcon, TrashIcon, PlusIcon } from "../../../icons";
@@ -34,7 +35,7 @@ import { EditIcon, TrashIcon, PlusIcon } from "../../../icons";
 // make a copy of the data, for the second table
 // const response2 = response.concat([]);
 
-function DataSiswa() {
+function Tables() {
   /**
    * DISCLAIMER: This code could be badly improved, but for the sake of the example
    * and readability, all the logic for both table are here.
@@ -45,6 +46,9 @@ function DataSiswa() {
   const history = useHistory();
   const [modalCreate, setModalCreate] = useState(false);
   const [modalUpdate, setModalUpdate] = useState(false);
+  const [modalDelete, setModalDelete] = useState(false);
+  const [idUserForDelete, setIdUserForDelete] = useState('');
+
   const { register, formState: { errors }, handleSubmit, setValue, resetField } = useForm();
   const { register: register2, formState: { errors: errors2 }, handleSubmit: handleSubmit2, setValue: setValue2, resetField: resetField2 } = useForm();
 
@@ -78,12 +82,23 @@ function DataSiswa() {
   function openModalUpdate(id) {
     setValue2('id_user', id);
     setValue2('edit_nama', dataTable.filter(e => e.id_user === id).map(e => e.nama));
-    setValue2('edit_username', dataTable.filter(e => e.id_user === id).map(e => e.username));
+    setValue2('edit_jenis_kelamin', dataTable.filter(e => e.id_user === id).map(e => e.jenis_kelamin));
+    setValue2('edit_kelas', dataTable.filter(e => e.id_user === id).map(e => e.kelas));
     setModalUpdate(true);
   }
 
   function closeModalUpdate() {
     setModalUpdate(false);
+  }
+
+  function openModalDelete(id) {
+    setIdUserForDelete(id);
+    setModalDelete(true);
+  }
+
+  function closeModalDelete() {
+    setIdUserForDelete('');
+    setModalDelete(false);
   }
 
   // on page change, load new sliced data
@@ -143,10 +158,10 @@ function DataSiswa() {
   }
 
   const createUser = (data) => {
-    UserService.createUser({...data, role: 1}).then(res => {
+    UserService.createUser({ ...data, username: data.nama, password: data.nama, role: 2 }).then(res => {
       getAllUsers();
       closeModalCreate();
-      toast.success('Data berhasil dibuat', { position: 'bottom-center'});
+      toast.success('Data berhasil dibuat', { position: 'bottom-center' });
     }, (err) => {
       console.log(err);
     })
@@ -156,28 +171,27 @@ function DataSiswa() {
     const sendData = {
       id_user: data.id_user,
       nama: data.edit_nama,
-      username: data.edit_username,
+      username: data.edit_nama,
+      password: data.edit_nama,
+      jenis_kelamin: data.edit_jenis_kelamin,
+      kelas: data.edit_kelas
     }
 
-    console.log(data);
-    console.log(sendData);
-    console.log(JSON.stringify(sendData));
-    console.log(JSON.parse(JSON.stringify(sendData)));
-
-    UserService.updateUser(sendData).then(res => {
+    UserService.updateSiswa(sendData).then(res => {
       getAllUsers();
       closeModalUpdate();
-      toast.success('Data berhasil diedit', { position: 'bottom-center'});
+      toast.success('Data berhasil diedit', { position: 'bottom-center' });
     }, (err) => {
       console.log(err);
     })
   }
 
   const deleteUser = (id) => {
-    UserService.deleteUser({id_user: id}).then(res => {
-      console.log(res);
+    UserService.deleteUser({ id_user: id }).then(res => {
+      // console.log(res);
+      closeModalDelete();
       getAllUsers();
-      toast.success('Data berhasil dihapus', { position: 'bottom-center'});
+      toast.success('Data berhasil dihapus', { position: 'bottom-center' });
     }, (err) => {
       console.log(err);
     })
@@ -216,36 +230,42 @@ function DataSiswa() {
               <TableCell>Jenis Kelamin</TableCell>
               <TableCell>Kelas</TableCell>
               <TableCell>Koin</TableCell>
+              <TableCell>Terakhir Login</TableCell>
               <TableCell>Actions</TableCell>
             </tr>
           </TableHeader>
           <TableBody>
             {dataTable.map((user, i) => (
-                <TableRow key={i}>
-                  <TableCell>
-                    <span className='text-sm'>{user.nama}</span>
-                  </TableCell>
-                  <TableCell>
+              <TableRow key={i}>
+                <TableCell>
+                  <span className='text-sm'>{user.nama}</span>
+                </TableCell>
+                <TableCell>
                   <span className='text-sm'>{user.jenis_kelamin}</span>
-                  </TableCell>
-                  <TableCell>
-                    <span className='text-sm'>{user.kelas}</span>
-                  </TableCell>
-                  <TableCell>
-                    <span className='text-sm'>{user.coin}</span>
-                  </TableCell>
-                  <TableCell>
-                    <div className='flex items-center space-x-4'>
-                      <Button onClick={() => openModalUpdate(user.id_user)} layout='link' size='icon' aria-label='Edit'>
-                        <EditIcon className='w-5 h-5' aria-hidden='true' />
-                      </Button>
-                      <Button onClick={() => deleteUser(user.id_user)} layout='link' size='icon' aria-label='Delete'>
-                        <TrashIcon className='w-5 h-5' aria-hidden='true' />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                </TableCell>
+                <TableCell>
+                  <span className='text-sm'>{user.kelas}</span>
+                </TableCell>
+                <TableCell>
+                  <span className='text-sm'>{user.coin}</span>
+                </TableCell>
+                <TableCell>
+                  <span className='text-sm'>
+                    {new Date(user.terakhir_login).toLocaleString()}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <div className='flex items-center space-x-4'>
+                    <Button onClick={() => openModalUpdate(user.id_user)} layout='link' size='icon' aria-label='Edit'>
+                      <EditIcon className='w-5 h-5' aria-hidden='true' />
+                    </Button>
+                    <Button onClick={() => openModalDelete(user.id_user)} layout='link' size='icon' aria-label='Delete'>
+                      <TrashIcon className='w-5 h-5' aria-hidden='true' />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
         <TableFooter>
@@ -277,36 +297,27 @@ function DataSiswa() {
               )}
 
               <Label className='mt-2'>
-                <span>Username</span>
-                <Input
-                  {...register("username", {
-                    required: 'Username is required',
-                    pattern: {
-                      value:
-                        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-                      message: "Please enter a valid username",
-                    },
-                  })}
-                  type='text'
-                  placeholder='Masukan Username'
-                  className='mt-2'
-                />
+                <span>Jenis Kelamin</span>
+                <Select {...register('jenis_kelamin', { required: 'Jenis Kelamin is required' })} className='mt-2'>
+                  <option value=''>-</option>
+                  <option value='Laki-Laki'>Laki-Laki</option>
+                  <option value='Perempuan'>Perempuan</option>
+                </Select>
               </Label>
-              {errors.username?.message && (
-                <HelperText valid={false}>{errors.username?.message}</HelperText>
+              {errors.jenis_kelamin?.message && (
+                <HelperText valid={false}>{errors.jenis_kelamin?.message}</HelperText>
               )}
 
               <Label className='mt-2'>
-                <span>Password</span>
-                <Input
-                  {...register("password", { required: 'Password is required' })}
-                  type='password'
-                  placeholder='Masukan Password'
-                  className='mt-2'
-                />
+                <span>Kelas</span>
+                <Select {...register('kelas', { required: 'Kelas is required' })} className='mt-2'>
+                  <option value=''>-</option>
+                  <option value='A1'>A1</option>
+                  <option value='A2'>A2</option>
+                </Select>
               </Label>
-              {errors.password?.message && (
-                <HelperText valid={false}>{errors.password?.message}</HelperText>
+              {errors.kelas?.message && (
+                <HelperText valid={false}>{errors.kelas?.message}</HelperText>
               )}
             </div>
           </ModalBody>
@@ -354,23 +365,27 @@ function DataSiswa() {
               )}
 
               <Label className='mt-2'>
-                <span>Username</span>
-                <Input
-                  {...register2("edit_username", {
-                    required: 'Username is required',
-                    pattern: {
-                      value:
-                        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-                      message: "Please enter a valid username",
-                    },
-                  })}
-                  type='text'
-                  placeholder='Masukan Username'
-                  className='mt-2'
-                />
+                <span>Jenis Kelamin</span>
+                <Select {...register2('edit_jenis_kelamin', { required: 'Jenis Kelamin is required' })} className='mt-2'>
+                  <option value=''>-</option>
+                  <option value='Laki-Laki'>Laki-Laki</option>
+                  <option value='Perempuan'>Perempuan</option>
+                </Select>
               </Label>
-              {errors2.edit_username?.message && (
-                <HelperText valid={false}>{errors2.edit_username?.message}</HelperText>
+              {errors2.edit_jenis_kelamin?.message && (
+                <HelperText valid={false}>{errors2.edit_jenis_kelamin?.message}</HelperText>
+              )}
+
+              <Label className='mt-2'>
+                <span>Kelas</span>
+                <Select {...register2('edit_kelas', { required: 'Kelas is required' })} className='mt-2'>
+                  <option value=''>-</option>
+                  <option value='A1'>A1</option>
+                  <option value='A2'>A2</option>
+                </Select>
+              </Label>
+              {errors2.edit_kelas?.message && (
+                <HelperText valid={false}>{errors2.edit_kelas?.message}</HelperText>
               )}
 
             </div>
@@ -397,8 +412,36 @@ function DataSiswa() {
           </ModalFooter>
         </form>
       </Modal>
+
+      {/* Modal Delete */}
+      <Modal isOpen={modalDelete} onClose={closeModalDelete}>
+        <ModalHeader>Perhatian!!</ModalHeader>
+        <ModalBody>
+          Apakah anda yakin untuk menghapus ?
+        </ModalBody>
+        <ModalFooter>
+          <div className="hidden sm:block">
+            <Button layout="outline" onClick={closeModalDelete}>
+              Batal
+            </Button>
+          </div>
+          <div className="hidden sm:block">
+            <Button onClick={() => deleteUser(idUserForDelete)} >Ya</Button>
+          </div>
+          <div className="block w-full sm:hidden">
+            <Button block size="large" layout="outline" onClick={closeModalDelete}>
+              Batal
+            </Button>
+          </div>
+          <div className="block w-full sm:hidden">
+            <Button onClick={() => deleteUser(idUserForDelete)} block size="large">
+              Ya
+            </Button>
+          </div>
+        </ModalFooter>
+      </Modal>
     </>
   );
 }
 
-export default DataSiswa;
+export default Tables;
