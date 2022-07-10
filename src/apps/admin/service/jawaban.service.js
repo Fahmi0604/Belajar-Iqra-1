@@ -23,7 +23,8 @@ const deleteJawabanById = (data) => {
 const jawabanService = {
     createJawaban,
     getAllJawaban,
-    getJawabanById
+    getJawabanById,
+    deleteJawabanById
 };
 
 export default jawabanService;

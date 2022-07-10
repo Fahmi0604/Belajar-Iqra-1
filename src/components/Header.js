@@ -12,8 +12,10 @@ import {
 } from '../icons'
 import { Avatar, Badge, Input, Dropdown, DropdownItem, WindmillContext } from '@windmill/react-ui'
 import AuthService from '../services/auth.service'
+import { useHistory } from 'react-router-dom'
 
 function Header() {
+  const history = useHistory();
   const { mode, toggleMode } = useContext(WindmillContext)
   const { toggleSidebar } = useContext(SidebarContext)
 
@@ -30,7 +32,7 @@ function Header() {
 
   const logOut = () => {
     AuthService.logout();
-    window.location.reload();
+    history.push('/splash')
   }
 
   return (

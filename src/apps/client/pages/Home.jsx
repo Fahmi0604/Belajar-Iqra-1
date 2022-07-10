@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { UserIcon } from '@heroicons/react/solid'
+import { UserIcon, ShoppingCartIcon } from '@heroicons/react/solid'
 import { useHistory } from 'react-router-dom'
 import UserService from '../../../services/user.service';
 import AuthService from '../../../services/auth.service';
@@ -31,7 +31,7 @@ export default function Home() {
         <div className='bg-custom-primary min-h-screen flex flex-col items-center py-4 lg:px-25%'>
             <div className='w-full flex items-center justify-between px-2'>
                 {/* <img src="/iqra_logo.svg" alt="logo" /> */}
-                <button className='w-aut flex items-center justify-center' onClick={() => navigate('/profil')}>
+                <button className='w-auto flex items-center justify-center' onClick={() => navigate('/profil')}>
                     <UserIcon className='w-8 h-8 bg-white p-1 text-gray-400 rounded border-2 border-solid border-gray-600' />
                     <p className='font-custom-font text-sm font-semibold bg-white px-2 rounded-r text-gray-600'>{currentUser && currentUser.nama}</p>
                 </button>
@@ -42,6 +42,14 @@ export default function Home() {
                 </div>
 
             </div>
+
+            <div className='w-full flex items-center justify-between px-2 mt-8'>
+                <button className='w-auto flex flex-col bg-custom-green-primary rounded' onClick={() => navigate('/toko')}>
+                    <ShoppingCartIcon className='w-10 h-10 pt-1 px-1 text-white ' />
+                    <p className='w-full font-custom-font-gum font-semibold text-center text-white'>Toko</p>
+                </button>
+            </div>
+
 
             <img className='md:w-3/4 md:-mt-16' src="/ilustrasi.svg" alt="ilustrasi" />
             <h1 className='px-4 font-custom-font font-medium text-2xl text-center text-white -mt-11 md:-mt-14 lg:-mt-14'>Belajar Huruf Hijaiyah Sambil Bermain</h1>

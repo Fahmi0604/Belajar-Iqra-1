@@ -13,6 +13,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import confetti from '../assets/confetti.json'
 import AuthService from '../../../services/auth.service';
 import JawabanService from '../service/jawaban.service';
+import UserService from '../../../services/user.service';
 
 // lottie option
 const defaultOptions = {
@@ -183,9 +184,9 @@ const Game1 = () => {
             // untuk mengecek apakah semua jawaban sudah benar semua sesuai soal
             let arr = await Object.keys(data).every((item, i) => data[item][0].huruf === digitsBeGone(item))
 
+            // untuk menyimpan data jawaban
             JawabanService.createJawaban({ id_user: user.uid, id_soal: location.state.data.id_soal, jawab: JSON.stringify(data), nilai: arr })
                 .then(res => {
-                    console.log(res);
                     toast.success('data berhasil disimpan', { position: 'bottom-center' });
                     getAllAnswer();
                 }, (error) => {
@@ -196,7 +197,23 @@ const Game1 = () => {
                         navigate("/login");
                         window.location.reload();
                     }
-                })
+                });
+
+            if (arr) {
+                UserService.updateCoin({ coin: 10, id_user: user.uid, tipe: 'tambah' })
+                    .then(res => {
+                        console.log(res);
+                    }, (error) => {
+                        console.log("Private page", error.response);
+                        // Invalid token
+                        if (error.response && error.response.status === 401) {
+                            AuthService.logout();
+                            navigate("/login");
+                            window.location.reload();
+                        }
+                    });
+            }
+
         } else {
             toast.error('Harap isi jawaban', { position: 'bottom-center' })
         }

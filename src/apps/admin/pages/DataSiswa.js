@@ -157,8 +157,105 @@ function Tables() {
     );
   }
 
+  const generateProfil = (jenis_kelamin) => {
+
+    let dataImageProfil;
+
+    if(jenis_kelamin === 'Laki-Laki') {
+      dataImageProfil = [
+        {
+          nama: 'profil_laki',
+          unlock: true, 
+          use: true
+        },
+        {
+          nama: 'profil_perempuan',
+          unlock: true, 
+          use: false
+        },
+        {
+          nama: 'profil_kucing',
+          unlock: false, 
+          use: false
+        },
+        {
+          nama: 'profil_anjing',
+          unlock: false, 
+          use: false
+        },
+        {
+          nama: 'profil_pinguin',
+          unlock: false, 
+          use: false
+        },
+        {
+          nama: 'profil_kelinci',
+          unlock: false, 
+          use: false
+        },
+        {
+          nama: 'profil_rare_anjing',
+          unlock: false, 
+          use: false
+        },
+        {
+          nama: 'profil_rare_poni',
+          unlock: false, 
+          use: false
+        }
+      ]
+    } else if(jenis_kelamin === 'Perempuan') {
+      dataImageProfil = [
+        {
+          nama: 'profil_laki',
+          unlock: true, 
+          use: false
+        },
+        {
+          nama: 'profil_perempuan',
+          unlock: true, 
+          use: true
+        },
+        {
+          nama: 'profil_kucing',
+          unlock: false, 
+          use: false
+        },
+        {
+          nama: 'profil_anjing',
+          unlock: false, 
+          use: false
+        },
+        {
+          nama: 'profil_pinguin',
+          unlock: false, 
+          use: false
+        },
+        {
+          nama: 'profil_kelinci',
+          unlock: false, 
+          use: false
+        },
+        {
+          nama: 'profil_rare_anjing',
+          unlock: false, 
+          use: false
+        },
+        {
+          nama: 'profil_rare_poni',
+          unlock: false, 
+          use: false
+        }
+      ]
+    } 
+
+    return JSON.stringify(dataImageProfil);
+  }
+
   const createUser = (data) => {
-    UserService.createUser({ ...data, username: data.nama, password: data.nama, role: 2 }).then(res => {
+
+    UserService.createUser({ ...data, username: data.nama, password: data.nama, role: 2, coin: 0, image: generateProfil(data.jenis_kelamin)})
+    .then(res => {
       getAllUsers();
       closeModalCreate();
       toast.success('Data berhasil dibuat', { position: 'bottom-center' });

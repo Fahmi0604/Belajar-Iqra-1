@@ -112,18 +112,19 @@ function TambahSoal() {
           console.log(error);
         });
 
-    }else {
-      SoalService.createSoal({ id_tugas: uid, tipe: tipeSoal, kalimat_soal: data.kalimatsoal, huruf_soal: '', huruf_bank: '', data_tambahan: JSON.stringify(newData_tambahan) })
-        .then(response => {
-          toast.success('Soal berhasil dibuat', { position: 'bottom-center' });
-          setTimeout(() => {
-            history.push(`/app/detailtugas/${uid}`);
-            window.location.reload();
-          }, 3000);
-        }, (error) => {
-          console.log(error);
-        });
     }
+    // else {
+    //   SoalService.createSoal({ id_tugas: uid, tipe: tipeSoal, kalimat_soal: data.kalimatsoal, huruf_soal: '', huruf_bank: '', data_tambahan: JSON.stringify(newData_tambahan) })
+    //     .then(response => {
+    //       toast.success('Soal berhasil dibuat', { position: 'bottom-center' });
+    //       setTimeout(() => {
+    //         history.push(`/app/detailtugas/${uid}`);
+    //         window.location.reload();
+    //       }, 3000);
+    //     }, (error) => {
+    //       console.log(error);
+    //     });
+    // }
   }
 
   const showSelectedOption = () => {
@@ -133,7 +134,8 @@ function TambahSoal() {
       case '2':
         return <SoalTipe2 huruf={huruf} hurufSoal={hurufSoal} tambahHurufSoal={(e) => tambahHurufSoal(e)} hapusHurufSoal={(e) => hapusHurufSoal(e)} handleSimpan={(e) => handleSimpan(e)} />;
       case '3':
-        return <SoalTipe3 lines={lines} setLines={(e) => setLines(e)} dot={dot} setDot={(e) => setDot(e)} handleSimpan={(e) => handleSimpan(e)} />;
+        return <SoalTipe3 />;
+        // return <SoalTipe3 lines={lines} setLines={(e) => setLines(e)} dot={dot} setDot={(e) => setDot(e)} handleSimpan={(e) => handleSimpan(e)} />;
       default:
         return '';
     }

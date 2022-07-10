@@ -15,6 +15,7 @@ const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 const Home = lazy(() => import('./apps/client/pages/Home'))
 const Tugas = lazy(() => import('./apps/client/pages/Tugas'))
 const Profil = lazy(() => import('./apps/client/pages/Profil'))
+const Toko = lazy(() => import('./apps/client/pages/Toko'))
 const Game1 = lazy(() => import('./apps/client/pages/Game1'))
 const Game2 = lazy(() => import('./apps/client/pages/Game2'))
 const Game3 = lazy(() => import('./apps/client/pages/Game3'))
@@ -43,6 +44,10 @@ function App() {
     {
       path: '/profil',
       component: Profil
+    },
+    {
+      path: '/toko',
+      component: Toko
     },
     {
       path: '/game1',

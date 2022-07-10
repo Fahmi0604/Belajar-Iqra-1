@@ -24,6 +24,14 @@ const updateSiswa = (data) => {
   return axios.put(API_URL + '/update_siswa', data, { headers: authHeader()});
 }
 
+const updateFotoProfil = (data) => {
+  return axios.put(API_URL + '/update_foto', data, { headers: authHeader()});
+}
+
+const updateCoin = (data) => {
+  return axios.put(API_URL + '/update_coin', data, { headers: authHeader()});
+}
+
 const deleteUser = (data) => {
   return axios.delete(API_URL + '/',{ headers: authHeader(), data});
 } 
@@ -34,6 +42,8 @@ const userService = {
   createUser,
   updateGuru,
   updateSiswa,
+  updateFotoProfil,
+  updateCoin,
   deleteUser,
 };
 

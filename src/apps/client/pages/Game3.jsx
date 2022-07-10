@@ -5,7 +5,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Dialog, Transition } from '@headlessui/react'
 import { ChevronLeftIcon } from '@heroicons/react/solid'
 import lockScroll from 'react-lock-scroll'
-import { isMobile } from 'react-device-detect';
+import { isDesktop, isMobile, isTablet } from 'react-device-detect';
 import DeviceOrientation, { Orientation } from 'react-screen-orientation'
 import Lottie from 'react-lottie';
 import animationData from '../assets/orientation.json'
@@ -108,7 +108,7 @@ function Game3() {
             p5.noFill()
             p5.beginShape()
             for (let i = 0; i < guidePoints.garis.length; i++) {
-                p5.curveVertex(guidePoints.garis[i].x, guidePoints.garis[i].y)
+                p5.curveVertex(guidePoints.garis[i].x, guidePoints.garis[i].y);
             }
             p5.endShape();
 
@@ -188,58 +188,71 @@ function Game3() {
     const reportChange = useCallback((state, handle) => {
         if (handle === screen1) {
             setToggle(state);
-            if (answerDone && !state) {
+            if ((isMobile || isTablet) && answerDone && !state) {
                 toast.success('berhasil', { position: 'bottom-center' });
             }
             console.log('Screen 1 went to', state, handle);
         }
     }, [screen1, answerDone]);
 
+    useEffect(() => {
+        if (answerDone && !(isMobile || isTablet)) {
+            toast.success('berhasil', { position: 'bottom-center' });
+        }
+    }, [answerDone])
+
+
     return isMobile ? (
-        <FullScreen handle={screen1} onChange={reportChange}>
-            <DeviceOrientation lockOrientation={'landscape'}>
-                <Orientation orientation='landscape' alwaysRender={false}>
-                    <div className='bg-custom-primary min-h-screen py-4 px-4 md:px-8 pt-4'>
-                        {toggle ?
-                            '' : (<div className='w-90% flex items-center mb-4'>
-                                <Link to={'/tugas'}>
-                                    <button>
-                                        <ChevronLeftIcon className='w-10 h-10 text-white bg-custom-secondary rounded-full' />
-                                    </button>
-                                </Link>
-                            </div>)}
-                        <h1 className='text-white'>3. Sambunglah titi-titik dibawah ini </h1>
-                        <div className='flex flex-col justify-center items-center mt-4 '>
-                            <div className='w-full flex justify-end mb-4'>
-                                {toggle ? <button className='px-4 py-1 bg-custom-green-primary shadow-custom-shadow-green text-white rounded' onClick={screen1.exit}>Exit</button>
-                                    : <button className='px-4 py-1 bg-custom-green-primary shadow-custom-shadow-green text-white rounded' onClick={screen1.enter}>Full Screen</button>}
+        <>
+            <Toaster />
+            <FullScreen handle={screen1} onChange={reportChange}>
+                <DeviceOrientation lockOrientation={'landscape'}>
+                    <Orientation orientation='landscape' alwaysRender={false}>
+                        <div className='bg-custom-primary min-h-screen py-4 px-4 md:px-8 pt-4'>
+                            {toggle ?
+                                '' : (<div className='w-90% flex items-center mb-4'>
+                                    <Link to={'/tugas'}>
+                                        <button>
+                                            <ChevronLeftIcon className='w-10 h-10 text-white bg-custom-secondary rounded-full' />
+                                        </button>
+                                    </Link>
+                                </div>)}
+                            <h1 className='text-white'>3. Sambunglah titi-titik dibawah ini </h1>
+                            <div className='flex flex-col justify-center items-center mt-4 '>
+                                <div className='w-full flex justify-end mb-4'>
+                                    {toggle ? <button className='px-4 py-1 bg-custom-green-primary shadow-custom-shadow-green text-white rounded' onClick={screen1.exit}>Exit</button>
+                                        : <button className='px-4 py-1 bg-custom-green-primary shadow-custom-shadow-green text-white rounded' onClick={screen1.enter}>Full Screen</button>}
+                                </div>
+                                <Sketch setup={setup} draw={draw} mousePressed={mousePressed} windowResized={windowResized} />
                             </div>
-                            <Sketch setup={setup} draw={draw} mousePressed={mousePressed} windowResized={windowResized} />
                         </div>
-                    </div>
-                </Orientation>
-                <Orientation orientation='portrait' alwaysRender={false}>
-                    <div className='bg-custom-primary min-h-screen px-4 md:px-8 xl:px-28 pt-4 flex flex-col justify-center items-center'>
-                        <Lottie options={defaultOptions} />
-                        <h1 className='text-white font-semibold text-lg'>Tolong Putar Device anda</h1>
-                    </div>
-                </Orientation>
-            </DeviceOrientation>
-        </FullScreen >
+                    </Orientation>
+                    <Orientation orientation='portrait' alwaysRender={false}>
+                        <div className='bg-custom-primary min-h-screen px-4 md:px-8 xl:px-28 pt-4 flex flex-col justify-center items-center'>
+                            <Lottie options={defaultOptions} />
+                            <h1 className='text-white font-semibold text-lg'>Tolong Putar Device anda</h1>
+                        </div>
+                    </Orientation>
+                </DeviceOrientation>
+            </FullScreen >
+        </>
     ) : (
-        <div className='bg-custom-primary min-h-screen px-4 md:px-8 lg:px-25% pt-4'>
-            <div className='w-90% flex items-center mb-4'>
-                <Link to={'/tugas'}>
-                    <button>
-                        <ChevronLeftIcon className='w-10 h-10 text-white bg-custom-secondary rounded-full' />
-                    </button>
-                </Link>
+        <>
+            <Toaster />
+            <div className='bg-custom-primary min-h-screen px-4 md:px-8 lg:px-25% pt-4'>
+                <div className='w-90% flex items-center mb-4'>
+                    <Link to={'/tugas'}>
+                        <button>
+                            <ChevronLeftIcon className='w-10 h-10 text-white bg-custom-secondary rounded-full' />
+                        </button>
+                    </Link>
+                </div>
+                <h1 className='text-white text-lg'>3. Sambunglah titi-titik dibawah ini </h1>
+                <div className='flex flex-col justify-center items-center mt-4 '>
+                    <Sketch setup={setup} draw={draw} mousePressed={mousePressed} windowResized={windowResized} />
+                </div>
             </div>
-            <h1 className='text-white text-lg'>3. Sambunglah titi-titik dibawah ini </h1>
-            <div className='flex flex-col justify-center items-center mt-4 '>
-                <Sketch setup={setup} draw={draw} mousePressed={mousePressed} windowResized={windowResized} />
-            </div>
-        </div>
+        </>
     );
 
 }

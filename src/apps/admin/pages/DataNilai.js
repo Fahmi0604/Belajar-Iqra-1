@@ -31,6 +31,7 @@ import {
   HelperText,
 } from "@windmill/react-ui";
 import { EditIcon, TrashIcon, PlusIcon } from "../../../icons";
+import jawabanService from "../service/jawaban.service";
 
 // import response from "../utils/demo/tableData";
 // make a copy of the data, for the second table
@@ -46,6 +47,9 @@ function Tables() {
    */
   const history = useHistory();
   const [modalDelete, setModalDelete] = useState(false);
+  const [idUserForDelete, setIdUserForDelete] = useState('');
+  const [idTugasForDelete, setIdTugasForDelete] = useState('');
+
   const [dataUsers, setDataUsers] = useState([]);
   const [dataJawaban, setDataJawaban] = useState([]);
   
@@ -63,6 +67,18 @@ function Tables() {
   // pagination change control
   function onPageChangeTable(p) {
     setPageTable(p);
+  }
+
+  function openModalDelete(idUser, idTugas) {
+    setIdUserForDelete(idUser);
+    setIdTugasForDelete(idTugas);
+    setModalDelete(true);
+  }
+
+  function closeModalDelete() {
+    setIdUserForDelete('');
+    setIdTugasForDelete('');
+    setModalDelete(false);
   }
 
   // on page change, load new sliced data
@@ -110,7 +126,6 @@ function Tables() {
               totalNilai: e.nilai
             });
           }
-          
         });
         
         setDataJawaban(arrayTemp);
@@ -169,10 +184,11 @@ function Tables() {
   }, [dataUsers, dataJawaban])
   
 
-  const deleteNilai = (id) => {
-    UserService.deleteUser({ id_user: id }).then(res => {
+  const deleteNilai = (idUser, idTugas) => {
+    jawabanService.deleteJawabanById({ id_user: idUser, id_tugas: idTugas }).then(res => {
       console.log(res);
       getAllNilai();
+      closeModalDelete();
       toast.success('Data berhasil dihapus', { position: 'bottom-center' });
     }, (err) => {
       console.log(err);
@@ -218,7 +234,7 @@ function Tables() {
                 </TableCell>
                 <TableCell>
                   <div className='flex items-center'>
-                    {user.totalNilai ? <Button onClick={() => deleteNilai(user.id_tugas, user.id_user)} layout='link' size='icon' aria-label='Delete'>
+                    {user.totalNilai ? <Button onClick={() => openModalDelete(user.id_user, user.id_tugas)} layout='link' size='icon' aria-label='Delete'>
                       <TrashIcon className='w-5 h-5' aria-hidden='true' />
                     </Button> : ''}
                   </div>
@@ -236,6 +252,33 @@ function Tables() {
           />
         </TableFooter>
       </TableContainer>
+
+      <Modal isOpen={modalDelete} onClose={closeModalDelete}>
+        <ModalHeader>Perhatian!!</ModalHeader>
+        <ModalBody>
+          Apakah anda yakin untuk menghapus ?
+        </ModalBody>
+        <ModalFooter>
+          <div className="hidden sm:block">
+            <Button layout="outline" onClick={closeModalDelete}>
+              Batal
+            </Button>
+          </div>
+          <div className="hidden sm:block">
+            <Button onClick={() => deleteNilai(idUserForDelete, idTugasForDelete)} >Ya</Button>
+          </div>
+          <div className="block w-full sm:hidden">
+            <Button block size="large" layout="outline" onClick={closeModalDelete}>
+              Batal
+            </Button>
+          </div>
+          <div className="block w-full sm:hidden">
+            <Button onClick={() => deleteNilai(idUserForDelete, idTugasForDelete)} block size="large">
+              Ya
+            </Button>
+          </div>
+        </ModalFooter>
+      </Modal>
     </>
   );
 }

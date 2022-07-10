@@ -16,6 +16,7 @@ module.exports = windmill({
         'custom-secondary': '#5098FF',
         'custom-dark': '#2E6DCD',
         'custom-orange': '#FFBE06',
+        'custom-yellow': '#FDD736',
         'custom-text': '#282828',
         'custom-green-primary': '#3FBD82',
         'custom-green-secondary': '#34A46F'
