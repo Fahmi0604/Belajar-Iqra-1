@@ -18,12 +18,12 @@ const routes = [
   },
   {
     path: '/app/datasiswa',
-    icon: 'UserIcon',
+    icon: 'PeopleIcon',
     name: 'Data Siswa',
   },
   {
     path: '/app/datatugas',
-    icon: 'FormsIcon',
+    icon: 'ModalsIcon',
     name: 'Data Tugas',
   },
   {

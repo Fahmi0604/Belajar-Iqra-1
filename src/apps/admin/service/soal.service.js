@@ -27,6 +27,10 @@ const updateSoal = (data) => {
     return axios.put(API_URL + '/', data, { headers: authHeader() });
 }
 
+const updateSoal2 = (data) => {
+    return axios.put(API_URL + '/updateSoal2', data, { headers: authHeader2() });
+}
+
 const deleteSoal = (data) => {
     return axios.delete(API_URL + '/', { headers: authHeader(), data });
 }
@@ -37,6 +41,7 @@ const soalService = {
     getSoalByIdTugas,
     getSoalByIdSoal,
     updateSoal,
+    updateSoal2,
     deleteSoal
 };
 

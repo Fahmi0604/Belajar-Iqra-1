@@ -3,6 +3,7 @@ import AuthService from '../services/auth.service';
 import UserService from '../services/user.service';
 import { useHistory } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
+import { ChevronLeftIcon } from '@heroicons/react/solid'
 
 export default function LoginSiswa() {
 
@@ -60,14 +61,26 @@ export default function LoginSiswa() {
         }
     };
 
+    const generateFotoProfil = (data) => {
+        const image = JSON.parse(data);
+        console.log(image.filter(f => f.unlock === true && f.use === true).map(m => ('/' + m.nama + '.svg')));
+        return (<img src={image.filter(f => f.unlock === true && f.use === true).map(m => ('/' + m.nama + '.svg'))} alt="profil" />);
+    }
+
     const navigate = (route) => {
         history.push(route);
     }
 
+
+
     return (
         <>
             <div className="flex flex-col items-center min-h-screen p-6 bg-custom-primary lg:px-25% bg-[image:url('/sky.png')] bg-cover bg-no-repeat bg-bottom">
-
+                <div className='w-full flex items-center mb-8'>
+                    <button onClick={() => navigate('/splash')}>
+                        <ChevronLeftIcon className='w-10 h-10 bg-white text-custom-primary rounded-full' />
+                    </button>
+                </div>
                 <div className="w-full flex-1 mx-auto mb-4 overflow-hidden bg-custom-primary shadow-click rounded-lg">
                     <div className='w-full flex justify-center'>
                         <p className='text-white text-3xl font-custom-font-gum font-medium mt-4'>TK A1</p>
@@ -77,7 +90,9 @@ export default function LoginSiswa() {
                         {users.filter(f => f.kelas === 'A1').map((e, i) =>
                             <button onClick={() => handleLogin(e.username, e.username)} key={i} className='flex w-47% p-2 bg-custom-secondary border-2 border-white rounded-md shadow-custom-shadow-gray text-custom-text text mb-3 mx-1.5% sm:w-31% sm:mx-1% sm:mb-4'>
                                 <div className='w-1/4 flex justify-center items-center'>
-                                    <img src={(e.jenis_kelamin === 'Laki-Laki') ? '/profil_laki.svg' : '/profil_perempuan.svg'} alt="profil" className='w-10 h-10' />
+                                    {/* <img src={(e.jenis_kelamin === 'Laki-Laki') ? '/profil_laki.svg' : '/profil_perempuan.svg'} alt="profil" className='w-10 h-10' /> */}
+                                    {/* <img src={JSON.parse(e.image).filter(f => f.unlock === true && f.use === true).map(m => ('/' + m.nama + '.svg'))} alt="profil" /> */}
+                                    {generateFotoProfil(e.image)}
                                 </div>
                                 <div className='flex justify-center items-center w-3/4 h-full text-white text-xl font-custom-font'>
                                     {e.nama}
@@ -96,9 +111,10 @@ export default function LoginSiswa() {
                         {users.filter(f => f.kelas === 'A2').map((e, i) =>
                             <button onClick={() => handleLogin(e.username, e.username)} key={i} className='flex w-47% p-2 bg-custom-secondary border-2 border-white rounded-md shadow-custom-shadow-gray text-custom-text text mb-3 mx-1.5% sm:w-31% sm:mx-1% sm:mb-4'>
                                 <div className='w-1/4 flex justify-center items-center'>
-                                    <img src={(e.jenis_kelamin === 'Laki-Laki') ? '/profil_laki.svg' : '/profil_perempuan.svg'} alt="profil" className='w-10 h-10' />
+                                    {/* <img src={(e.jenis_kelamin === 'Laki-Laki') ? '/profil_laki.svg' : '/profil_perempuan.svg'} alt="profil" className='w-10 h-10' /> */}
+                                    {generateFotoProfil(e.image)}
                                 </div>
-                                <div className='flex justify-center items-center w-3/4 text-white text-xl font-custom-font'>
+                                <div className='flex justify-center items-center w-3/4 h-full text-white text-xl font-custom-font'>
                                     {e.nama}
                                 </div>
                             </button>

@@ -8,6 +8,7 @@ import { GithubIcon, TwitterIcon } from '../icons'
 import { Label, Input, Button } from '@windmill/react-ui'
 import UserService from '../services/user.service'
 import toast, { Toaster } from 'react-hot-toast';
+import { ChevronLeftIcon } from '@heroicons/react/solid'
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -23,7 +24,7 @@ function Login() {
           toast.success('Berhasil Login', { position: 'bottom-center' });
 
           UserService.getUserById(res.uid).then(response => {
-            if (response.data.data.role === '1') {
+            if (response.data.data.role === '1' || response.data.data.role === '0') {
               history.push("/app/dashboard");
               setTimeout(() => {
                 window.location.reload();
@@ -47,10 +48,15 @@ function Login() {
     }
   };
 
+  const navigate = (route) => {
+    history.push(route);
+  }
+
   return (
     <>
       <Toaster />
       <div className="flex items-center min-h-screen p-6 bg-custom-primary lg:px-25% bg-[image:url('/sky.png')] bg-cover bg-no-repeat bg-bottom">
+
         <div className="flex-1 h-full max-w-4xl mx-auto overflow-hidden bg-white rounded-lg shadow-xl">
           <div className="flex flex-col overflow-y-auto md:flex-row">
             <div className="h-32 bg-custom-primary md:h-auto md:w-1/2">
