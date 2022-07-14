@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react'
-
 import CTA from '../../../components/CTA'
 import InfoCard from '../../../components/Cards/InfoCard'
 import ChartCard from '../../../components/Chart/ChartCard'
 import { Doughnut, Line } from 'react-chartjs-2'
 import ChartLegend from '../../../components/Chart/ChartLegend'
 import PageTitle from '../../../components/Typography/PageTitle'
-import { ChatIcon, CartIcon, MoneyIcon, PeopleIcon } from '../../../icons'
+import { ChatIcon, ModalsIcon, TablesIcon, UserIcon } from '../../../icons'
+import { ClockIcon, UserGroupIcon } from '@heroicons/react/solid'
 import RoundIcon from '../../../components/RoundIcon'
-import response from '../../../utils/demo/tableData'
 import {
   TableBody,
   TableContainer,
@@ -21,32 +20,113 @@ import {
   Badge,
   Pagination,
 } from '@windmill/react-ui'
+import UserService from '../../../services/user.service'
+import AuthService from '../../../services/auth.service'
+import TugasService from '../service/tugas.service'
+// import {
+//   doughnutOptions,
+//   lineOptions,
+//   doughnutLegends,
+//   lineLegends,
+// } from '../../../utils/demo/chartsData'
+import { useHistory } from 'react-router-dom'
 
-import {
-  doughnutOptions,
-  lineOptions,
-  doughnutLegends,
-  lineLegends,
-} from '../../../utils/demo/chartsData'
+const doughnutLegends = [
+  { title: 'A1', color: 'bg-blue-500' },
+  { title: 'A2', color: 'bg-teal-500' },
+];
 
 function Dashboard() {
-  const [page, setPage] = useState(1)
-  const [data, setData] = useState([])
 
-  // pagination setup
-  const resultsPerPage = 10
-  const totalResults = response.length
+  const history = useHistory();
+  const [dataUsers, setDataUsers] = useState([]);
+  const [dataTugas, setDataTugas] = useState([]);
+  const [dataSoal, setDataSoal] = useState([]);
+  
+  const [barLegends, setBarLegends] = useState();
 
-  // pagination change control
-  function onPageChange(p) {
-    setPage(p)
+  const [doughnutOptions, setDoughnutOptions] = useState({
+    data: {
+        datasets: [
+            {
+                data: [0, 0],
+                /**
+                 * These colors come from Tailwind CSS palette
+                 * https://tailwindcss.com/docs/customizing-colors/#default-color-palette
+                 */
+                backgroundColor: ['#22c55e', '#f97316'],
+                label: 'Dataset 1',
+            },
+        ],
+        labels: ['Kelas A2', 'Kelas A1'],
+    },
+    options: {
+        responsive: true,
+        cutoutPercentage: 80,
+    },
+    legend: {
+        display: false,
+    },
+  });
+  
+  const getAllUsers = () => {
+    UserService.getAllUsers().then(
+      (response) => {
+        const data = response.data.data.filter(e => e.role === '2');
+        setDataUsers(data);
+        // setting donut chart
+        setDoughnutOptions({
+          ...doughnutOptions,
+          data: {
+              datasets: [
+                  {
+                      data: [
+                          data.filter(e => e.kelas === 'A2').length,
+                          data.filter(e => e.kelas === 'A1').length,
+                      ],
+                      backgroundColor: ['#0694a2', '#1c64f2'],
+                      label: 'Dataset 1',
+                  }
+              ]
+          }
+        });
+        console.log(data.filter(e => e.kelas === 'A1').length)
+      },
+      (error) => {
+        console.log("Private page", error.response);
+        // Invalid token
+        if (error.response && error.response.status === 401) {
+          AuthService.logout();
+          history.push("/login");
+          window.location.reload();
+        }
+      }
+    );
   }
 
-  // on page change, load new sliced data
-  // here you would make another server request for new data
+  const getAllTugas = () => {
+    TugasService.getAllTugas().then(
+      (response) => {
+        setDataTugas(response.data.tugas);
+        setDataSoal(response.data.soal);
+      },
+      (error) => {
+        console.log("Private page", error.response);
+        // Invalid token
+        if (error.response && error.response.status === 401) {
+          AuthService.logout();
+          history.push("/login");
+          window.location.reload();
+        }
+      }
+    );
+  }  
+
   useEffect(() => {
-    setData(response.slice((page - 1) * resultsPerPage, page * resultsPerPage))
-  }, [page])
+    getAllUsers();
+    getAllTugas();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>
@@ -56,99 +136,59 @@ function Dashboard() {
 
       {/* <!-- Cards --> */}
       <div className="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
-        <InfoCard title="Total clients" value="6389">
+        <InfoCard title="Total Guru" value="35">
           <RoundIcon
-            icon={PeopleIcon}
+            icon={UserGroupIcon}
+            iconColorClass="text-teal-500 dark:text-teal-100"
+            bgColorClass="bg-teal-100 dark:bg-teal-500"
+            className="mr-4"
+          />
+        </InfoCard>
+
+        <InfoCard title="Total Siswa" value={dataUsers.length}>
+          <RoundIcon
+            icon={UserIcon}
             iconColorClass="text-orange-500 dark:text-orange-100"
             bgColorClass="bg-orange-100 dark:bg-orange-500"
             className="mr-4"
           />
         </InfoCard>
 
-        <InfoCard title="Account balance" value="$ 46,760.89">
+        <InfoCard title="Total Tugas" value={dataTugas.length}>
           <RoundIcon
-            icon={MoneyIcon}
+            icon={ModalsIcon}
             iconColorClass="text-green-500 dark:text-green-100"
             bgColorClass="bg-green-100 dark:bg-green-500"
             className="mr-4"
           />
         </InfoCard>
 
-        <InfoCard title="New sales" value="376">
+        <InfoCard title="Total Soal" value={dataSoal.length}>
           <RoundIcon
-            icon={CartIcon}
+            icon={TablesIcon}
             iconColorClass="text-blue-500 dark:text-blue-100"
             bgColorClass="bg-blue-100 dark:bg-blue-500"
             className="mr-4"
           />
         </InfoCard>
-
-        <InfoCard title="Pending contacts" value="35">
-          <RoundIcon
-            icon={ChatIcon}
-            iconColorClass="text-teal-500 dark:text-teal-100"
-            bgColorClass="bg-teal-100 dark:bg-teal-500"
-            className="mr-4"
-          />
-        </InfoCard>
       </div>
-
-      {/* <TableContainer>
-        <Table>
-          <TableHeader>
-            <tr>
-              <TableCell>Client</TableCell>
-              <TableCell>Amount</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Date</TableCell>
-            </tr>
-          </TableHeader>
-          <TableBody>
-            {data.map((user, i) => (
-              <TableRow key={i}>
-                <TableCell>
-                  <div className="flex items-center text-sm">
-                    <Avatar className="hidden mr-3 md:block" src={user.avatar} alt="User image" />
-                    <div>
-                      <p className="font-semibold">{user.name}</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">{user.job}</p>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <span className="text-sm">$ {user.amount}</span>
-                </TableCell>
-                <TableCell>
-                  <Badge type={user.status}>{user.status}</Badge>
-                </TableCell>
-                <TableCell>
-                  <span className="text-sm">{new Date(user.date).toLocaleDateString()}</span>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <TableFooter>
-          <Pagination
-            totalResults={totalResults}
-            resultsPerPage={resultsPerPage}
-            label="Table navigation"
-            onChange={onPageChange}
-          />
-        </TableFooter>
-      </TableContainer> */}
 
       <PageTitle>Charts</PageTitle>
       <div className="grid gap-6 mb-8 md:grid-cols-2">
-        <ChartCard title="Revenue">
+        <ChartCard title="Total siswa per kelas">
           <Doughnut {...doughnutOptions} />
           <ChartLegend legends={doughnutLegends} />
         </ChartCard>
 
-        <ChartCard title="Traffic">
+        {/* <ChartCard title="Traffic">
           <Line {...lineOptions} />
           <ChartLegend legends={lineLegends} />
-        </ChartCard>
+        </ChartCard> */}
+
+        {/* <ChartCard title="Status Absen hari ini">
+            <Bar {...barOptions} />
+            <ChartLegend legends={barLegends} />
+        </ChartCard> */}
       </div>
     </>
   )
