@@ -27,6 +27,7 @@ import {
   ModalBody,
   ModalFooter,
   Label,
+  Select,
   Input,
   HelperText,
 } from "@windmill/react-ui";
@@ -52,7 +53,11 @@ function Tables() {
 
   const [dataUsers, setDataUsers] = useState([]);
   const [dataJawaban, setDataJawaban] = useState([]);
-  
+  const [dataTugas, setDataTugas] = useState([]);
+  const [pilihanFilter, setPilihanFilter] = useState('');
+  // data tabel yang sudah di tambahkan data user (data fix)
+  const [dataJawabanModif, setDataJawabanModif] = useState([]);
+
   // setup pages control for every table
   const [pageTable, setPageTable] = useState(1);
 
@@ -85,16 +90,22 @@ function Tables() {
   // here you would make another server request for new data
 
   useEffect(() => {
-    getAllUsers()
+    getAllUsers();
+    getAllNilai();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [history, pageTable]);
+
+  useEffect(() => {
+    getAllTugas();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  
 
   const getAllUsers = () => {
     UserService.getAllUsers().then(
       (response) => {
         const data = response.data.data.filter(e => e.role === '2');
         setDataUsers(data);
-        getAllNilai();
       },
       (error) => {
         console.log("Private page", error.response);
@@ -116,7 +127,7 @@ function Tables() {
         let arrayTemp = [];
 
         // nilai dijumlah berdasarkan id_tugas dan id_user yang sama dan menjadi totalNilai
-        data.forEach((e,i) => {
+        data.forEach((e, i) => {
           if (arrayTemp.some(s => s.id_tugas === e.id_tugas && s.id_user === e.id_user)) {
             let index = arrayTemp.findIndex(fi => fi.id_tugas === e.id_tugas && fi.id_user === e.id_user)
             arrayTemp[index].totalNilai = arrayTemp[index].totalNilai + e.nilai;
@@ -127,7 +138,7 @@ function Tables() {
             });
           }
         });
-        
+
         setDataJawaban(arrayTemp);
       },
       (error) => {
@@ -142,32 +153,41 @@ function Tables() {
     );
   }
 
+  const getAllTugas = () => {
+    TugasService.getAllTugas().then(
+      (response) => {
+        setDataTugas(response.data.tugas);
+      },
+      (error) => {
+        console.log("Private page", error.response);
+        // Invalid token
+        if (error.response && error.response.status === 401) {
+          AuthService.logout();
+          history.push("/login");
+          window.location.reload();
+        }
+      }
+    );
+  }  
+
+  // digunakan untuk modifikasi data jawaban + data user
   const modifDataJawaban = () => {
 
     let arrayTemp = [...dataUsers];
-    // arrayTemp.forEach((e,i) => {
-    //   if (dataUsers.some(s => s.id_user === e.id_user)) {
-    //     let index = dataUsers.findIndex(fi => fi.id_user === e.id_user);
-    //     arrayTemp[i] = {
-    //       ...data[i],
-    //       nama: dataUsers[index].nama,
-    //       kelas: dataUsers[index].kelas
-    //     }
-    //   }
-    // })
 
-    arrayTemp.forEach((e,i) => {
+    arrayTemp.forEach((e, i) => {
       if (dataJawaban.some(s => s.id_user === e.id_user)) {
-            let index = dataJawaban.findIndex(fi => fi.id_user === e.id_user);
-            arrayTemp[i] = {
-              ...dataUsers[i],
-              id_tugas: dataJawaban[index].id_tugas,
-              nama_tugas: dataJawaban[index].nama_tugas,
-              totalNilai: dataJawaban[index].totalNilai
-            }
-          }
+        let index = dataJawaban.findIndex(fi => fi.id_user === e.id_user);
+        arrayTemp[i] = {
+          ...dataUsers[i],
+          id_tugas: dataJawaban[index].id_tugas,
+          nama_tugas: dataJawaban[index].nama_tugas,
+          totalNilai: dataJawaban[index].totalNilai
+        }
+      }
     });
 
+    setDataJawabanModif(arrayTemp);
     setTotalResults(arrayTemp.length);
     setDataTable(
       arrayTemp.slice(
@@ -180,9 +200,9 @@ function Tables() {
   // digunakan untuk modifikasi datajawaban: menambahkan nama dan kelas siswa berdasarkan id_user
   useEffect(() => {
     modifDataJawaban();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataUsers, dataJawaban])
-  
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataUsers, dataJawaban]);
+
 
   const deleteNilai = (idUser, idTugas) => {
     jawabanService.deleteJawabanById({ id_user: idUser, id_tugas: idTugas }).then(res => {
@@ -195,14 +215,74 @@ function Tables() {
     })
   }
 
+  // set data tabel by pilihan filter
+  const filterDataTable = (id_tugas) => {
+    const dataFilter = dataJawabanModif.filter(e => e.id_tugas === parseInt(id_tugas));
+    console.log(dataFilter);
+    setTotalResults(dataFilter.length);
+    setDataTable(
+        dataFilter.slice(
+            (pageTable - 1) * resultsPerPage,
+            pageTable * resultsPerPage
+        )
+    );
+  }
+
+  useEffect(() => {
+      filterDataTable(pilihanFilter);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pilihanFilter]);
+
+  // digunakan untuk menggenerate data tabel berdasarkan filter
+  const generateDataTable = () => {
+    if (pilihanFilter !== '') {
+      return (
+        dataTable.map((user, i) => (
+          <TableRow key={i}>
+            <TableCell>
+              <span className='text-sm font-medium'>{user.nama}</span>
+            </TableCell>
+            <TableCell>
+              <span className='text-sm'>{user.kelas}</span>
+            </TableCell>
+            <TableCell>
+              <span className='text-sm'>{user.nama_tugas ? user.nama_tugas : (<Badge type="warning">belum mengerjakan</Badge>)}</span>
+            </TableCell>
+            <TableCell>
+              <span className='text-sm'>
+                {user.totalNilai ? user.totalNilai : (<Badge type="warning">belum mengerjakan</Badge>)}
+              </span>
+            </TableCell>
+            <TableCell>
+              <div className='flex items-center'>
+                {user.totalNilai ? <Button onClick={() => openModalDelete(user.id_user, user.id_tugas)} layout='link' size='icon' aria-label='Delete'>
+                  <TrashIcon className='w-5 h-5' aria-hidden='true' />
+                </Button> : ''}
+              </div>
+            </TableCell>
+          </TableRow>
+        ))
+      )
+    } else {
+      return null;
+    }
+  }
+
   return (
     <>
       <Toaster />
       <PageTitle>Data Nilai</PageTitle>
 
-      {/* <CTA /> */}
-
-      {/* <SectionTitle>Data Guru</SectionTitle> */}
+      <div className="flex flex-col sm:flex-row sm:justify-end mb-4">
+        <Label className="my-4">
+          <Select className='mt-1' onChange={(e) => setPilihanFilter(e.target.value)}>
+            <option value={''}>Pilih kelas</option>
+            {dataTugas.map((tugas, index) => (
+              <option key={index} value={tugas.id_tugas}>{tugas.nama_tugas}</option>
+            ))}
+          </Select>
+        </Label>
+      </div>
 
       <TableContainer className='mb-8 border'>
         <Table>
@@ -216,31 +296,7 @@ function Tables() {
             </tr>
           </TableHeader>
           <TableBody>
-            {dataTable.map((user, i) => (
-              <TableRow key={i}>
-                <TableCell>
-                  <span className='text-sm font-medium'>{user.nama}</span>
-                </TableCell>
-                <TableCell>
-                  <span className='text-sm'>{user.kelas}</span>
-                </TableCell>
-                <TableCell>
-                  <span className='text-sm'>{user.nama_tugas ? user.nama_tugas : (<Badge type="warning">belum mengerjakan</Badge>)}</span>
-                </TableCell>
-                <TableCell>
-                  <span className='text-sm'>
-                    {user.totalNilai ? user.totalNilai : (<Badge type="warning">belum mengerjakan</Badge>)}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <div className='flex items-center'>
-                    {user.totalNilai ? <Button onClick={() => openModalDelete(user.id_user, user.id_tugas)} layout='link' size='icon' aria-label='Delete'>
-                      <TrashIcon className='w-5 h-5' aria-hidden='true' />
-                    </Button> : ''}
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
+            {generateDataTable()}
           </TableBody>
         </Table>
         <TableFooter>
