@@ -52,7 +52,7 @@ export default function Toko() {
                 // Invalid token
                 if (error.response && error.response.status === 401) {
                     AuthService.logout();
-                    navigate("/login");
+                    navigate("/splash");
                     window.location.reload();
                 }
             }));
@@ -71,7 +71,7 @@ export default function Toko() {
                         // Invalid token
                         if (error.response && error.response.status === 401) {
                             AuthService.logout();
-                            navigate("/login");
+                            navigate("/splash");
                             window.location.reload();
                         }
                     });
@@ -103,7 +103,7 @@ export default function Toko() {
                     // Invalid token
                     if (error.response && error.response.status === 401) {
                         AuthService.logout();
-                        navigate("/login");
+                        navigate("/splash");
                         window.location.reload();
                     }
                 });

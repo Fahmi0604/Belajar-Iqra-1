@@ -5,7 +5,7 @@ import {
   Label,
   Select,
 } from "@windmill/react-ui";
-import { useHistory, useParams} from 'react-router-dom';
+import { useHistory, useParams, useLocation } from 'react-router-dom';
 import AuthService from "../../../services/auth.service";
 import HurufService from "../service/huruf.service";
 import SoalService from "../service/soal.service";
@@ -19,6 +19,7 @@ function EditSoal(props) {
   // tipesoal dari parameter
   const { uid } = useParams();
   const history = useHistory();
+  const { state: { data: detailSoal } } = useLocation();
 
   // data semua huruh
   const [huruf, setHuruf] = useState([]);
@@ -26,15 +27,9 @@ function EditSoal(props) {
   // huruf pada soal
   const [hurufSoal, setHurufSoal] = useState([]);
 
-  // dibuat untuk array garis dan titik soal tipe 3
-  const [lines, setLines] = useState([]);
-  const [dot, setDot] = useState([]);
-
   const [tipeSoal, setTipeSoal] = useState('1');
 
   useEffect(() => {
-    setTipeSoal(uid);
-
     HurufService.getAllHuruf().then(
       (response) => {
         setHuruf(response.data.data);
@@ -52,6 +47,11 @@ function EditSoal(props) {
 
   }, [history, uid]);
 
+  useEffect(() => {
+    setTipeSoal(detailSoal.tipe);
+    console.log(detailSoal);
+  }, [detailSoal])
+
   const tambahHurufSoal = (data) => {
     data && setHurufSoal([...hurufSoal, data]);
   }
@@ -63,20 +63,17 @@ function EditSoal(props) {
   }
 
   const handleSimpan = (data) => {
+    console.log({ ...data, uid, tipeSoal, hurufSoal });
+
     if (tipeSoal !== '3' && hurufSoal.length < 1) {
       toast.error('Harap Lengkapi huruf soal!!', { position: 'bottom-center' })
       return;
     }
 
-    const newData_tambahan ={
-      garis: [...lines],
-      titik: [...dot]
-    }
-
     if (tipeSoal === '1') {
-      SoalService.createSoal({ id_tugas: uid, tipe: tipeSoal, huruf_soal: JSON.stringify([...hurufSoal]), huruf_bank: JSON.stringify([...data.pilih_huruf_bank]), data_tambahan: ''})
+      SoalService.updateSoal({ id_soal: detailSoal.id_soal, kalimat_soal: data.kalimatsoal, huruf_soal: JSON.stringify([...hurufSoal]), huruf_bank: JSON.stringify([...data.pilih_huruf_bank]), data_tambahan: '' })
         .then(response => {
-          toast.success('Soal berhasil dibuat', { position: 'bottom-center' });
+          toast.success('Soal berhasil diedit', { position: 'bottom-center' });
           setTimeout(() => {
             history.push(`/app/detailtugas/${uid}`);
             window.location.reload();
@@ -84,31 +81,18 @@ function EditSoal(props) {
         }, (error) => {
           console.log(error);
         });
-    }else if (tipeSoal === '2') {
-
+    } else if (tipeSoal === '2') {
       const formData = new FormData();
       // audiosoal nanti menjadi data_tambahan
       formData.append('audiosoal', data.audiosoal[0]);
-      formData.append('id_tugas', uid);
-      formData.append('tipe', tipeSoal);
+      formData.append('id_soal', detailSoal.id_soal);
+      formData.append('kalimat_soal', data.kalimatsoal);
       formData.append('huruf_soal', JSON.stringify([...hurufSoal]));
       formData.append('huruf_bank', JSON.stringify([...data.pilih_huruf_bank]));
 
-      SoalService.createSoal2(formData)
+      SoalService.updateSoal2(formData)
         .then(response => {
-          toast.success('Soal berhasil dibuat', { position: 'bottom-center' });
-          setTimeout(() => {
-            history.push(`/app/detailtugas/${uid}`);
-            window.location.reload();
-          }, 3000);
-        }, (error) => {
-          console.log(error);
-        });
-
-    }else {
-      SoalService.createSoal({ id_tugas: uid, tipe: tipeSoal, huruf_soal: '', huruf_bank: '', data_tambahan: JSON.stringify(newData_tambahan) })
-        .then(response => {
-          toast.success('Soal berhasil dibuat', { position: 'bottom-center' });
+          toast.success('Soal berhasil diedit', { position: 'bottom-center' });
           setTimeout(() => {
             history.push(`/app/detailtugas/${uid}`);
             window.location.reload();
@@ -119,6 +103,52 @@ function EditSoal(props) {
     }
   }
 
+  //const handleSimpan = (data) => {
+  //   if (tipeSoal !== '3' && hurufSoal.length < 1) {
+  //     toast.error('Harap Lengkapi huruf soal!!', { position: 'bottom-center' })
+  //     return;
+  //   }
+
+  //   const newData_tambahan ={
+  //     garis: [...lines],
+  //     titik: [...dot]
+  //   }
+
+  //   if (tipeSoal === '1') {
+  //     SoalService.createSoal({ id_tugas: uid, tipe: tipeSoal, huruf_soal: JSON.stringify([...hurufSoal]), huruf_bank: JSON.stringify([...data.pilih_huruf_bank]), data_tambahan: ''})
+  //       .then(response => {
+  //         toast.success('Soal berhasil dibuat', { position: 'bottom-center' });
+  //         setTimeout(() => {
+  //           history.push(`/app/detailtugas/${uid}`);
+  //           window.location.reload();
+  //         }, 3000);
+  //       }, (error) => {
+  //         console.log(error);
+  //       });
+  //   }else if (tipeSoal === '2') {
+
+  //     const formData = new FormData();
+  //     // audiosoal nanti menjadi data_tambahan
+  //     formData.append('audiosoal', data.audiosoal[0]);
+  //     formData.append('id_tugas', uid);
+  //     formData.append('tipe', tipeSoal);
+  //     formData.append('huruf_soal', JSON.stringify([...hurufSoal]));
+  //     formData.append('huruf_bank', JSON.stringify([...data.pilih_huruf_bank]));
+
+  //     SoalService.createSoal2(formData)
+  //       .then(response => {
+  //         toast.success('Soal berhasil dibuat', { position: 'bottom-center' });
+  //         setTimeout(() => {
+  //           history.push(`/app/detailtugas/${uid}`);
+  //           window.location.reload();
+  //         }, 3000);
+  //       }, (error) => {
+  //         console.log(error);
+  //       });
+
+  //   }
+  // }
+
   const showSelectedOption = () => {
     switch (tipeSoal) {
       case '1':
@@ -126,7 +156,7 @@ function EditSoal(props) {
       case '2':
         return <SoalTipe2 huruf={huruf} hurufSoal={hurufSoal} setHurufSoal={(e) => setHurufSoal(e)} tambahHurufSoal={(e) => tambahHurufSoal(e)} hapusHurufSoal={(e) => hapusHurufSoal(e)} handleSimpan={(e) => handleSimpan(e)} />;
       case '3':
-        return <SoalTipe3 lines={lines} setLines={(e) => setLines(e)} dot={dot} setDot={(e) => setDot(e)} handleSimpan={(e) => handleSimpan(e)} />;
+        return <SoalTipe3  />;
       default:
         return '';
     }

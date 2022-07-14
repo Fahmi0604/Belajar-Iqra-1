@@ -18,6 +18,12 @@ export default function Home() {
                 setCurrentUser(res.data.data);
             }, (error => {
                 console.log(error);
+
+                if (error.response && error.response.status === 401) {
+                    AuthService.logout();
+                    navigate("/splash");
+                    window.location.reload();
+                }
             }))
         }
     }, [])

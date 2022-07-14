@@ -89,7 +89,7 @@ function DetailTugas() {
         {dataSoal.map((el, index) => (
           <div key={index} className='w-full md:w-1/4 md:mr-4 mb-4 text-left bg-blue-300 shadow-md rounded-lg dark:bg-gray-800'>
             <div className='flex justify-end'>
-              <Button onClick={() => navigate(el.tipe, el)} size='small' layout='link' icon={EditIcon} />
+              <Button onClick={() => navigate(uid, el)} size='small' layout='link' icon={EditIcon} />
               <Button onClick={() => deleteSoal(el.id_soal)} size='small' layout='link' icon={TrashIcon} />
             </div>
             <div className="px-6 pb-4">

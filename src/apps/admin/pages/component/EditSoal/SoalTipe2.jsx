@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
     Input,
     HelperText,
@@ -13,11 +13,24 @@ import {
 import { useForm } from "react-hook-form";
 import SectionTitle from "../../../../../components/Typography/SectionTitle";
 import { TrashIcon } from "../../../../../icons";
+import { useLocation } from 'react-router-dom';
 
 export default function SoalTipe2(props) {
 
-    const { register, formState: { errors }, handleSubmit } = useForm();
+    const location = useLocation();
+    const { register, formState: { errors }, handleSubmit, setValue } = useForm();
     const [pilihHurufSoal, setPilihHurufSoal] = useState();
+
+    useEffect(() => {
+        const data = location.state.data
+
+        if (data.tipe === '2') {
+            setValue('kalimatsoal', data.kalimat_soal);
+            props.setHurufSoal(JSON.parse(data.huruf_soal));
+            setValue('pilih_huruf_bank', JSON.parse(data.huruf_bank))
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [location])
 
     return (
         <>

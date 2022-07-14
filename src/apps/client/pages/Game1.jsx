@@ -107,7 +107,7 @@ const Game1 = () => {
                     // Invalid token
                     if (error.response && error.response.status === 401) {
                         AuthService.logout();
-                        navigate("/login");
+                        navigate("/splash");
                         window.location.reload();
                     }
                 });
@@ -194,7 +194,7 @@ const Game1 = () => {
                     // Invalid token
                     if (error.response && error.response.status === 401) {
                         AuthService.logout();
-                        navigate("/login");
+                        navigate("/splash");
                         window.location.reload();
                     }
                 });
@@ -208,7 +208,7 @@ const Game1 = () => {
                         // Invalid token
                         if (error.response && error.response.status === 401) {
                             AuthService.logout();
-                            navigate("/login");
+                            navigate("/splash");
                             window.location.reload();
                         }
                     });
@@ -265,7 +265,8 @@ const Game1 = () => {
                                                     X
                                                 </button>
                                             </div>
-                                            <div as='bank' className={`w-full flex justify-around mt-2`} ref={provided.innerRef}>
+                                            {/* <div as='bank' className={`w-full flex justify-around mt-2`} ref={provided.innerRef}> */}
+                                            <div as='bank' className={`w-full flex ${(dataBank.length > 5) ? 'flex-wrap' : 'justify-around'} flex-wrap mt-2`} ref={provided.innerRef}>
                                                 {dataBank.map((item, index) => (
                                                     <Draggable
                                                         key={item.id}
@@ -370,7 +371,8 @@ const Game1 = () => {
                                             X
                                         </button>
                                     </div>
-                                    <div as='bank' className={`w-full flex justify-around mt-2`} ref={provided.innerRef}>
+                                    {/* <div as='bank' className={`w-full flex justify-around mt-2`} ref={provided.innerRef}> */}
+                                    <div as='bank' className={`w-full flex ${(dataBank.length > 5) ? 'flex-wrap' : 'justify-around'} flex-wrap mt-2`} ref={provided.innerRef}>
                                         {dataBank.map((item, index) => (
                                             <Draggable
                                                 key={item.id}

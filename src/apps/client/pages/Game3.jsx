@@ -1,7 +1,7 @@
 import React, { useState, useCallback, Fragment, useEffect } from 'react';
 import Sketch from 'react-p5'
 import MyLine from '../component/game3/myLine';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useHistory } from 'react-router-dom';
 import { Dialog, Transition } from '@headlessui/react'
 import { ChevronLeftIcon } from '@heroicons/react/solid'
 import lockScroll from 'react-lock-scroll'
@@ -12,6 +12,8 @@ import animationData from '../assets/orientation.json'
 import { FullScreen, useFullScreenHandle } from "react-full-screen";
 import confetti from '../assets/confetti.json'
 import toast, { Toaster } from 'react-hot-toast';
+import AuthService from '../../../services/auth.service';
+import JawabanService from '../service/jawaban.service';
 
 // lottie option
 const defaultOptions = {
@@ -41,6 +43,7 @@ function Game3() {
     let lines = []
     let Score = []
 
+    const history = useHistory();
     const location = useLocation();
     const [guidePoints, setGuidePoints] = useState({
         garis: [
@@ -53,6 +56,8 @@ function Game3() {
     const [toggle, setToggle] = useState(false)
     // const [modal, setModal] = useState(false)
     const [answerDone, setAnswerDone] = useState(false)
+    const [saving, setSaving] = useState(false);
+
     lockScroll(toggle)
 
     const screen1 = useFullScreenHandle();
@@ -97,11 +102,11 @@ function Game3() {
             lines.push(new MyLine(p5))
         }
 
-        lines.forEach(line => line.show())
+        lines.forEach(line => line.show());
 
-        plotChecker()
+        plotChecker();
 
-        if (Score.length === (guidePoints.garis.length)) {
+        if (saving) {
             p5.background(255)
             p5.stroke(90)
             p5.strokeWeight(10)
@@ -113,14 +118,36 @@ function Game3() {
             p5.endShape();
 
             for (let i = 0; i < guidePoints.titik.length; i++) {
-                p5.fill(90)
-                p5.noStroke()
+                p5.fill(90);
+                p5.noStroke();
                 p5.circle(guidePoints.titik[i].x, guidePoints.titik[i].y, 10);
             }
 
-            p5.noLoop()
-            setAnswerDone(true)
+            p5.noLoop();
+        } else {
+            if (Score.length === (guidePoints.garis.length) && answerDone === false) {
+                p5.background(255)
+                p5.stroke(90)
+                p5.strokeWeight(10)
+                p5.noFill()
+                p5.beginShape()
+                for (let i = 0; i < guidePoints.garis.length; i++) {
+                    p5.curveVertex(guidePoints.garis[i].x, guidePoints.garis[i].y);
+                }
+                p5.endShape();
+
+                for (let i = 0; i < guidePoints.titik.length; i++) {
+                    p5.fill(90);
+                    p5.noStroke();
+                    p5.circle(guidePoints.titik[i].x, guidePoints.titik[i].y, 10);
+                }
+
+                p5.noLoop();
+                setAnswerDone(true);
+                saveAnswer();
+            }
         }
+
     };
 
     const mousePressed = (p5) => {
@@ -189,18 +216,69 @@ function Game3() {
         if (handle === screen1) {
             setToggle(state);
             if ((isMobile || isTablet) && answerDone && !state) {
-                toast.success('berhasil', { position: 'bottom-center' });
+                toast.success('data berhasil disimpan', { position: 'bottom-center' });
             }
             console.log('Screen 1 went to', state, handle);
         }
     }, [screen1, answerDone]);
 
-    useEffect(() => {
-        if (answerDone && !(isMobile || isTablet)) {
-            toast.success('berhasil', { position: 'bottom-center' });
-        }
-    }, [answerDone])
+    // useEffect(() => {
+    //     if (answerDone && !(isMobile || isTablet)) {
+    //         toast.success('berhasil', { position: 'bottom-center' });
+    //     }
+    // }, [answerDone]);
 
+    const saveAnswer = () => {
+        const user = AuthService.getCurrentUser();
+        if (user) {
+            JawabanService.createJawaban({ id_user: user.uid, id_soal: location.state.data.id_soal, jawab: JSON.stringify(Score), nilai: true })
+                .then(res => {
+                    toast.success('data berhasil disimpan', { position: 'bottom-center' });
+                    // getAllAnswer();
+                }, (error) => {
+                    console.log("Private page", error.response);
+                    // Invalid token
+                    if (error.response && error.response.status === 401) {
+                        AuthService.logout();
+                        navigate("/splash");
+                        window.location.reload();
+                    }
+                });
+        }
+    }
+
+    const getAllAnswer = () => {
+        const user = AuthService.getCurrentUser();
+
+        if (user) {
+            JawabanService.getJawabanById({ id_user: user.uid, id_soal: location.state.data.id_soal })
+                .then(res => {
+                    if (res.data.success) {
+                        const answer = JSON.parse(res.data.data.jawab);
+                        setSaving(true);
+                        Score = [...answer];
+                        console.log(Score);
+                    }
+                }, (error) => {
+                    console.log("Private page", error.response);
+                    // Invalid token
+                    if (error.response && error.response.status === 401) {
+                        AuthService.logout();
+                        navigate("/splash");
+                        window.location.reload();
+                    }
+                });
+        }
+    }
+
+    useEffect(() => {
+        getAllAnswer();
+    }, [location]);
+
+
+    const navigate = (route) => {
+        history.push(route);
+    }
 
     return isMobile ? (
         <>

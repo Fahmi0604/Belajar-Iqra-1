@@ -57,7 +57,7 @@ export default function Tugas() {
                 // Invalid token
                 if (error.response && error.response.status === 401) {
                     AuthService.logout();
-                    navigate("/login");
+                    navigate("/splash");
                     window.location.reload();
                 }
             });
@@ -73,7 +73,7 @@ export default function Tugas() {
                 // Invalid token
                 if (error.response && error.response.status === 401) {
                     AuthService.logout();
-                    navigate("/login");
+                    navigate("/splash");
                     window.location.reload();
                 }
             });
@@ -157,14 +157,17 @@ export default function Tugas() {
     const generateStampNilai = (id_tugas) => {
         const user = AuthService.getCurrentUser();
 
+        // total soal per tugas
         const soalByTugas = dataSoalOri.filter(e => e.id_tugas === id_tugas);
+        // total jawaban berdasarkan id tugas
         const jawabanByTugas = dataJawaban.filter(e => e.id_tugas === id_tugas && e.id_user === user.uid);
 
-        const score = jawabanByTugas.filter(e => e.nilai === 1);
-        // console.log(score);
+        const soalByType = dataSoalOri.filter(e => e.id_tugas === id_tugas && (e.tipe === "1" || e.tipe === "2"));
+        // jumlah nilai yang benar dari soal tipe 1 dan 2
+        const score = jawabanByTugas.filter(e => e.nilai === 1 && (e.tipe === "1" || e.tipe === "2"));
 
-        // if (soalByTugas.length === jawabanByTugas.length) {
-        if (jawabanByTugas.length === 10) {
+        // untuk mengecek jumlah soal sudah terjawab semua 
+        if (jawabanByTugas.length === soalByTugas.length) {
             return (
                 <div className='w-full flex justify-end'>
                     {/* <div className='rubber absolute -mt-11'>100</div> */}
@@ -175,7 +178,8 @@ export default function Tugas() {
                             <div className='firstPart w-16 h-16 md:w-100px md:h-100px'></div>
                             <div className='firstPart w-16 h-16 md:w-100px md:h-100px'></div>
                             <div className='firstHole w-16 h-16 md:w-100px md:h-100px flex justify-center items-center font-medium md:text-3xl'>
-                                {(~~(100 / soalByTugas.length) * score.length)}
+                                {/* rumus : (100 / jumlahsoal) * jawabanbenar */}
+                                {(~~(100 / soalByType.length) * score.length)}
                             </div>
                         </div>
                     </div>

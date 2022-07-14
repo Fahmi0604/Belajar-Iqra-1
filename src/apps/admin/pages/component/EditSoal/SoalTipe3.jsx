@@ -13,34 +13,33 @@ import {
 import { useForm } from "react-hook-form";
 import SectionTitle from "../../../../../components/Typography/SectionTitle";
 import Sketch from 'react-p5'
-import { useLocation } from 'react-router-dom';
+import SoalService from '../../../service/soal.service';
+import { useHistory, useParams } from 'react-router-dom';
+import toast, { Toaster } from 'react-hot-toast';
 // import MyLine from './myLine';
 
-export default function SoalTipe3(props) {
+export default function SoalTipe3() {
 
-    const location = useLocation();
-    // let lines = [];
+    let garis = [];
+    let titik = []
+    let alatTulis = 'garis';
 
-    // const [lines, setLines] = useState([]);
-    // const [dot, setDot] = useState([]);
-    const [alatTulis, setAlatTulis] = useState('garis');
+    const { uid } = useParams();
+    const history = useHistory();
 
     // const [showSoal, setShowSoal] = useState(false);
     const { register, formState: { errors }, handleSubmit, setValue } = useForm();
 
-    useEffect(() => {
-
-        const data = location.state.data;
-        const data_tambahan = JSON.parse(data.data_tambahan);
-        setValue('kalimatsoal', data.kalimat_soal);
-        props.setLines(data_tambahan.garis);
-        props.setDot(data_tambahan.titik);
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [location])
-
     const setup = (p5, canvasParentRef) => {
-        p5.createCanvas(550, 300).parent(canvasParentRef);
+        const canvas = p5.createCanvas(550, 300).parent(canvasParentRef);
+
+        canvas.doubleClicked((event) => {
+            saveDot(event);
+        });
+
+        // cnv.mouseClicked((event) => {
+        //     saveLine(event);
+        // });
     }
 
     const setupView = (p5, createParentRef) => {
@@ -48,43 +47,64 @@ export default function SoalTipe3(props) {
     }
 
     const draw = (p5) => {
-        p5.background(255)
+        p5.background(255);
 
-        if (p5.mouseIsPressed && (alatTulis === 'titik')) {
-            props.setDot([...props.dot, { x: p5.mouseX, y: p5.mouseY, px: p5.pmouseX, py: p5.pmouseY }]);
+
+        (garis.length > 0) && garis.forEach(line => show(p5, line, 'line'));
+        (titik.length > 0) && titik.forEach(dot => show(p5, dot, 'titik'));
+    }
+
+    function saveDot(event) {
+        if (alatTulis === 'titik') {
+            titik.push({ x: event.offsetX, y: event.offsetY, px: event.offsetX, py: event.offsetY })
         }
 
-        if (p5.mouseIsPressed && (alatTulis === 'garis')) {
-            // lines.push(new MyLine(p5))
-            props.setLines([...props.lines, { x: p5.mouseX, y: p5.mouseY, px: p5.pmouseX, py: p5.pmouseY }]);
+        if (alatTulis === 'garis') {
+            garis.push({ x: event.offsetX, y: event.offsetY, px: event.offsetX, py: event.offsetY })
+            console.log(garis);
         }
-
-        (props.lines.length > 0) && props.lines.forEach(line => show(p5, line, 'line'));
-        (props.dot.length > 0) && props.dot.forEach(dot => show(p5, dot, 'dot'));
     }
 
     const drawView = (p5) => {
         p5.clear();
         p5.background(255);
 
-        (props.lines.length > 0) && props.lines.forEach((p, index) => {
-            if ((index % 3) > 0) {
-                plot(p5, 222, 160, p.x, p.y);
-            }
-        });
+        // (garis.length > 0) && garis.forEach((p, index) => {
+        //     // if ((index % 3) > 0) {
+        //     plot(p5, 222, 160, p.x, p.y);
+        //     // }
+        // });
 
-        (props.dot.length > 0) && props.dot.forEach((p, index) => {
-            plot(p5, 160, 160, p.x, p.y);
-        });
+        // (titik.length > 0) && titik.forEach((p, index) => {
+        //     plot(p5, 160, 160, p.x, p.y);
+        // });
+
+        // p5.background(255);
+        p5.stroke(90);
+        p5.strokeWeight(10);
+        p5.noFill();
+        p5.beginShape();
+        for (let i = 0; i < garis.length; i++) {
+            p5.curveVertex(garis[i].x, garis[i].y)
+        }
+        p5.endShape();
+
+        p5.beginShape();
+        for (let i = 0; i < titik.length; i++) {
+            p5.fill(90)
+            p5.noStroke()
+            p5.circle(titik[i].x, titik[i].y, 10);
+        }
+        p5.endShape();
     }
 
     const show = (p5, line, type) => {
-        if (type === 'dot') {
+        if (type === 'titik') {
             p5.stroke('blue')
         } else {
             p5.stroke(50);
         }
-        p5.strokeWeight(15);
+        p5.strokeWeight(5);
         p5.line(line.px, line.py, line.x, line.y);
     }
 
@@ -95,7 +115,7 @@ export default function SoalTipe3(props) {
     const plot = (p5, fillColor, strokeColor, x, y) => {
         p5.fill(fillColor);
         // p5.stroke(strokeColor);
-        p5.strokeWeight(3);
+        p5.strokeWeight(5);
         p5.ellipse(x, y, 1);
     }
 
@@ -106,18 +126,49 @@ export default function SoalTipe3(props) {
         p5.text(txt, x + 8, y + 10);
     }
 
-    const alatTulisChanged = (e) => {
-        setAlatTulis(e.target.value);
+    const clearCanvas = () => {
+        garis = [];
+        titik = [];
     }
 
-    const clearCanvas = () => {
-        props.setLines([]);
-        props.setDot([]);
+    const handleSimpan = (data) => {
+        const newData_tambahan = {
+            garis: [...garis],
+            titik: [...titik]
+        }
+
+        console.log({ id_tugas: uid, tipe: '3', kalimat_soal: data.kalimatsoal, huruf_soal: '', huruf_bank: '', data_tambahan: JSON.stringify(newData_tambahan) });
+        SoalService.createSoal({ id_tugas: uid, tipe: '3', kalimat_soal: data.kalimatsoal, huruf_soal: '', huruf_bank: '', data_tambahan: JSON.stringify(newData_tambahan) })
+            .then(response => {
+                toast.success('Soal berhasil dibuat', { position: 'bottom-center' });
+                setTimeout(() => {
+                    history.push(`/app/detailtugas/${uid}`);
+                    window.location.reload();
+                }, 3000);
+            }, (error) => {
+                console.log(error);
+            });
+    }
+
+    const changeAlatTulis = (value) => {
+        if (value === 'garis') {
+            let btn = document.getElementById('btn-garis');
+            btn.disabled = true;
+            let btn2 = document.getElementById('btn-titik');
+            btn2.disabled = false;
+            alatTulis = value;
+        } else if (value === 'titik') {
+            let btn = document.getElementById('btn-garis');
+            btn.disabled = false;
+            let btn2 = document.getElementById('btn-titik');
+            btn2.disabled = true;
+            alatTulis = value;
+        }
     }
 
     return (
         <>
-            <form onSubmit={handleSubmit(props.handleSimpan)} encType='multipart/form-data' >
+            <form onSubmit={handleSubmit(handleSimpan)} >
                 <div className='px-4 py-3 mb-8 bg-white rounded-lg shadow-md dark:bg-gray-800'>
 
                     <Label className='mb-3'>
@@ -139,12 +190,17 @@ export default function SoalTipe3(props) {
                 <SectionTitle>Data Huruf Soal </SectionTitle>
                 <div className='px-4 py-3 mb-8 bg-blue-400 rounded-lg shadow-md dark:bg-gray-800'>
                     <Label className='mb-4'>
-                        <Input type='radio' name='alat' value='garis' checked={alatTulis === 'garis'} onChange={(e) => alatTulisChanged(e)} />
-                        <span className='text-white ml-2 mr-4 dark:text-gray-400'>Garis</span>
+                        <button className='font-medium focus:outline-none px-4 py-2 rounded-lg text-sm text-white bg-blue-600 border border-transparent active:bg-blue-600 disabled:bg-blue-200 focus:ring focus:ring-blue-300 mr-4'
+                            id='btn-garis' onClick={() => changeAlatTulis('garis', 'btn-garis')} >
+                            Garis
+                        </button>
 
-                        <Input type='radio' name='alat' value='titik' checked={alatTulis === 'titik'} onChange={(e) => alatTulisChanged(e)} />
-                        <span className='text-white ml-2 mr-4 dark:text-gray-400'>Titik</span>
+                        <button className='font-medium focus:outline-none px-4 py-2 rounded-lg text-sm text-white bg-blue-600 border border-transparent active:bg-blue-600 disabled:bg-blue-200 focus:ring focus:ring-blue-300'
+                            id='btn-titik' onClick={() => changeAlatTulis('titik', 'btn-titik')} >
+                            Titik
+                        </button>
 
+                        {/* <span className='text-white ml-2 mr-4 dark:text-gray-400'>Untuk membuat GARIS klik 1 kali, untuk membuat TITIK klik 2 kali (doubel click) </span> */}
                     </Label>
                     <Sketch setup={setup} draw={draw} windowResized={windowResized} />
                     {/* <Button onClick={() => setShowSoal(true)}>Lihat Tampilan soal</Button> */}

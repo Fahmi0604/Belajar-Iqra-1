@@ -111,7 +111,6 @@ function TambahSoal() {
         }, (error) => {
           console.log(error);
         });
-
     }
     // else {
     //   SoalService.createSoal({ id_tugas: uid, tipe: tipeSoal, kalimat_soal: data.kalimatsoal, huruf_soal: '', huruf_bank: '', data_tambahan: JSON.stringify(newData_tambahan) })
