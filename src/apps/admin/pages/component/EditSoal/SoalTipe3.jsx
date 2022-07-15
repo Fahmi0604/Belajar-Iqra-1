@@ -18,10 +18,10 @@ import { useHistory, useParams } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 // import MyLine from './myLine';
 
-export default function SoalTipe3() {
+export default function SoalTipe3(props) {
 
-    let garis = [];
-    let titik = []
+    let lines = [];
+    let dot = [];
     let alatTulis = 'garis';
 
     const { uid } = useParams();
@@ -30,10 +30,19 @@ export default function SoalTipe3() {
     // const [showSoal, setShowSoal] = useState(false);
     const { register, formState: { errors }, handleSubmit, setValue } = useForm();
 
-    const setup = (p5, canvasParentRef) => {
-        const canvas = p5.createCanvas(550, 300).parent(canvasParentRef);
+    useEffect(() => {
+        setValue('kalimatsoal', props.kalimat_soal);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        lines = [...props.garis];
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        dot = [...props.titik];
+    }, [])
 
-        canvas.doubleClicked((event) => {
+
+    const setup = (p5, canvasParentRef) => {
+        const cnv = p5.createCanvas(550, 300).parent(canvasParentRef);
+
+        cnv.doubleClicked((event) => {
             saveDot(event);
         });
 
@@ -49,19 +58,17 @@ export default function SoalTipe3() {
     const draw = (p5) => {
         p5.background(255);
 
-
-        (garis.length > 0) && garis.forEach(line => show(p5, line, 'line'));
-        (titik.length > 0) && titik.forEach(dot => show(p5, dot, 'titik'));
+        (lines.length > 0) && lines.forEach(line => show(p5, line, 'line'));
+        (dot.length > 0) && dot.forEach(dot => show(p5, dot, 'dot'));
     }
 
     function saveDot(event) {
         if (alatTulis === 'titik') {
-            titik.push({ x: event.offsetX, y: event.offsetY, px: event.offsetX, py: event.offsetY })
+            dot.push({ x: event.offsetX, y: event.offsetY, px: event.offsetX, py: event.offsetY })
         }
 
         if (alatTulis === 'garis') {
-            garis.push({ x: event.offsetX, y: event.offsetY, px: event.offsetX, py: event.offsetY })
-            console.log(garis);
+            lines.push({ x: event.offsetX, y: event.offsetY, px: event.offsetX, py: event.offsetY })
         }
     }
 
@@ -69,13 +76,13 @@ export default function SoalTipe3() {
         p5.clear();
         p5.background(255);
 
-        // (garis.length > 0) && garis.forEach((p, index) => {
+        // (lines.length > 0) && lines.forEach((p, index) => {
         //     // if ((index % 3) > 0) {
         //     plot(p5, 222, 160, p.x, p.y);
         //     // }
         // });
 
-        // (titik.length > 0) && titik.forEach((p, index) => {
+        // (dot.length > 0) && dot.forEach((p, index) => {
         //     plot(p5, 160, 160, p.x, p.y);
         // });
 
@@ -84,22 +91,23 @@ export default function SoalTipe3() {
         p5.strokeWeight(10);
         p5.noFill();
         p5.beginShape();
-        for (let i = 0; i < garis.length; i++) {
-            p5.curveVertex(garis[i].x, garis[i].y)
+        for (let i = 0; i < lines.length; i++) {
+            // p5.curveVertex(lines[i].x, lines[i].y);
+            p5.vertex(lines[i].x, lines[i].y);
         }
         p5.endShape();
 
         p5.beginShape();
-        for (let i = 0; i < titik.length; i++) {
+        for (let i = 0; i < dot.length; i++) {
             p5.fill(90)
             p5.noStroke()
-            p5.circle(titik[i].x, titik[i].y, 10);
+            p5.circle(dot[i].x, dot[i].y, 10);
         }
         p5.endShape();
     }
 
     const show = (p5, line, type) => {
-        if (type === 'titik') {
+        if (type === 'dot') {
             p5.stroke('blue')
         } else {
             p5.stroke(50);
@@ -127,20 +135,20 @@ export default function SoalTipe3() {
     }
 
     const clearCanvas = () => {
-        garis = [];
-        titik = [];
+        lines = [];
+        dot = [];
     }
 
     const handleSimpan = (data) => {
         const newData_tambahan = {
-            garis: [...garis],
-            titik: [...titik]
+            garis: [...lines],
+            titik: [...dot]
         }
 
-        console.log({ id_tugas: uid, tipe: '3', kalimat_soal: data.kalimatsoal, huruf_soal: '', huruf_bank: '', data_tambahan: JSON.stringify(newData_tambahan) });
-        SoalService.createSoal({ id_tugas: uid, tipe: '3', kalimat_soal: data.kalimatsoal, huruf_soal: '', huruf_bank: '', data_tambahan: JSON.stringify(newData_tambahan) })
+        // console.log({ id_tugas: uid, tipe: '3', kalimat_soal: data.kalimatsoal, huruf_soal: '', huruf_bank: '', data_tambahan: JSON.stringify(newData_tambahan) });
+        SoalService.updateSoal({ id_soal: props.id_soal, kalimat_soal: data.kalimatsoal, huruf_soal: '', huruf_bank: '', data_tambahan: JSON.stringify(newData_tambahan) })
             .then(response => {
-                toast.success('Soal berhasil dibuat', { position: 'bottom-center' });
+                toast.success('Soal berhasil diedit', { position: 'bottom-center' });
                 setTimeout(() => {
                     history.push(`/app/detailtugas/${uid}`);
                     window.location.reload();

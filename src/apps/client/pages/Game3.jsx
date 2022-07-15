@@ -52,7 +52,7 @@ function Game3() {
         titik: [
 
         ]
-    })
+    });
     const [toggle, setToggle] = useState(false)
     // const [modal, setModal] = useState(false)
     const [answerDone, setAnswerDone] = useState(false)
@@ -107,11 +107,12 @@ function Game3() {
         plotChecker();
 
         if (saving) {
-            p5.background(255)
-            p5.stroke(90)
-            p5.strokeWeight(10)
-            p5.noFill()
-            p5.beginShape()
+            p5.background(255);
+            p5.stroke(90);
+            p5.strokeWeight(10);
+            p5.noFill();
+            p5.beginShape();
+
             for (let i = 0; i < guidePoints.garis.length; i++) {
                 p5.curveVertex(guidePoints.garis[i].x, guidePoints.garis[i].y);
             }
@@ -126,13 +127,16 @@ function Game3() {
             p5.noLoop();
         } else {
             if (Score.length === (guidePoints.garis.length) && answerDone === false) {
-                p5.background(255)
-                p5.stroke(90)
-                p5.strokeWeight(10)
-                p5.noFill()
-                p5.beginShape()
+                p5.background(255);
+                p5.stroke(90);
+                p5.strokeWeight(10);
+                p5.noFill();
+                p5.beginShape();
+
                 for (let i = 0; i < guidePoints.garis.length; i++) {
-                    p5.curveVertex(guidePoints.garis[i].x, guidePoints.garis[i].y);
+                    console.log(guidePoints.garis[i]);
+                    // p5.curveVertex(guidePoints.garis[i].x, guidePoints.garis[i].y);
+                    p5.vertex(guidePoints.garis[i].x, guidePoints.garis[i].y);
                 }
                 p5.endShape();
 
@@ -257,7 +261,6 @@ function Game3() {
                         const answer = JSON.parse(res.data.data.jawab);
                         setSaving(true);
                         Score = [...answer];
-                        console.log(Score);
                     }
                 }, (error) => {
                     console.log("Private page", error.response);

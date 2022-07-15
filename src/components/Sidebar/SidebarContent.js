@@ -20,7 +20,6 @@ function SidebarContent() {
 
     if(user) {
       setCurrentUser(user);
-      console.log(user);
     }
 
   }, [])

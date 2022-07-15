@@ -14,7 +14,7 @@ import SoalTipe1 from "./component/EditSoal/SoalTipe1";
 import SoalTipe2 from "./component/EditSoal/SoalTipe2";
 import SoalTipe3 from "./component/EditSoal/SoalTipe3";
 
-function EditSoal(props) {
+function EditSoal() {
 
   // tipesoal dari parameter
   const { uid } = useParams();
@@ -45,12 +45,16 @@ function EditSoal(props) {
       }
     );
 
-  }, [history, uid]);
+  }, [history]);
 
   useEffect(() => {
-    setTipeSoal(detailSoal.tipe);
+    setTimeout(() => {
+      // setTipeSoal('3');
+      setTipeSoal(detailSoal.tipe);
+    }, 1000);
+
     console.log(detailSoal);
-  }, [detailSoal])
+  }, [])
 
   const tambahHurufSoal = (data) => {
     data && setHurufSoal([...hurufSoal, data]);
@@ -156,7 +160,7 @@ function EditSoal(props) {
       case '2':
         return <SoalTipe2 huruf={huruf} hurufSoal={hurufSoal} setHurufSoal={(e) => setHurufSoal(e)} tambahHurufSoal={(e) => tambahHurufSoal(e)} hapusHurufSoal={(e) => hapusHurufSoal(e)} handleSimpan={(e) => handleSimpan(e)} />;
       case '3':
-        return <SoalTipe3  />;
+        return <SoalTipe3 id_soal={detailSoal.id_soal} kalimat_soal={detailSoal.kalimat_soal} garis={JSON.parse(detailSoal.data_tambahan).garis} titik={JSON.parse(detailSoal.data_tambahan).titik} />;
       default:
         return '';
     }
