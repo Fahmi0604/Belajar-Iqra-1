@@ -139,6 +139,7 @@ function Tables() {
           }
         });
 
+        console.log(arrayTemp);
         setDataJawaban(arrayTemp);
       },
       (error) => {
@@ -173,28 +174,33 @@ function Tables() {
   // digunakan untuk modifikasi data jawaban + data user
   const modifDataJawaban = () => {
 
-    let arrayTemp = [...dataUsers];
+    if (pilihanFilter !== '') {
+      let arrayTemp = [...dataUsers];
 
-    arrayTemp.forEach((e, i) => {
-      if (dataJawaban.some(s => s.id_user === e.id_user)) {
-        let index = dataJawaban.findIndex(fi => fi.id_user === e.id_user);
-        arrayTemp[i] = {
-          ...dataUsers[i],
-          id_tugas: dataJawaban[index].id_tugas,
-          nama_tugas: dataJawaban[index].nama_tugas,
-          totalNilai: dataJawaban[index].totalNilai
+      arrayTemp.forEach((e, i) => {
+        if (dataJawaban.some(s => s.id_user === e.id_user && s.id_tugas === parseInt(pilihanFilter))) {
+          console.log('masuk');
+          let index = dataJawaban.findIndex(fi => fi.id_user === e.id_user && fi.id_tugas === parseInt(pilihanFilter));
+          arrayTemp[i] = {
+            ...dataUsers[i],
+            id_tugas: dataJawaban[index].id_tugas,
+            nama_tugas: dataJawaban[index].nama_tugas,
+            totalNilai: dataJawaban[index].totalNilai
+          }
         }
-      }
-    });
+      });
 
-    setDataJawabanModif(arrayTemp);
-    setTotalResults(arrayTemp.length);
-    setDataTable(
-      arrayTemp.slice(
-        (pageTable - 1) * resultsPerPage,
-        pageTable * resultsPerPage
-      )
-    );
+      console.log(arrayTemp);
+      setDataJawabanModif(arrayTemp);
+      setTotalResults(arrayTemp.length);
+      setDataTable(
+        arrayTemp.slice(
+          (pageTable - 1) * resultsPerPage,
+          pageTable * resultsPerPage
+        )
+      );  
+    }
+    
   }
 
   // digunakan untuk modifikasi datajawaban: menambahkan nama dan kelas siswa berdasarkan id_user
@@ -217,11 +223,28 @@ function Tables() {
 
   // set data tabel by pilihan filter
   const filterDataTable = (id_tugas) => {
-    const dataFilter = dataJawabanModif.filter(e => e.id_tugas === parseInt(id_tugas));
-    console.log(dataFilter);
-    setTotalResults(dataFilter.length);
+    // const dataFilter = dataJawabanModif.filter(e => e.id_tugas === parseInt(id_tugas));
+
+    let arrayTemp = [...dataUsers];
+
+    arrayTemp.forEach((e, i) => {
+      if (dataJawaban.some(s => s.id_user === e.id_user && s.id_tugas === parseInt(id_tugas))) {
+        let index = dataJawaban.findIndex(fi => fi.id_user === e.id_user && fi.id_tugas === parseInt(id_tugas));
+        console.log(typeof dataJawaban[index].id_tugas);
+        console.log(typeof arrayTemp[index].id_tugas);
+        arrayTemp[i] = {
+          ...dataUsers[i],
+          id_tugas: dataJawaban[index].id_tugas,
+          nama_tugas: dataJawaban[index].nama_tugas,
+          totalNilai: dataJawaban[index].totalNilai
+        }
+      }
+    });
+
+    console.log(arrayTemp);
+    setTotalResults(arrayTemp.length);
     setDataTable(
-        dataFilter.slice(
+        arrayTemp.slice(
             (pageTable - 1) * resultsPerPage,
             pageTable * resultsPerPage
         )

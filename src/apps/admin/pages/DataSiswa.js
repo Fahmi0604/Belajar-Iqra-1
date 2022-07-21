@@ -254,13 +254,22 @@ function Tables() {
 
   const createUser = (data) => {
 
-    UserService.createUser({ ...data, username: data.nama, password: data.nama, role: 2, coin: 0, image: generateProfil(data.jenis_kelamin)})
+    console.log({ ...data, username: data.username, password: data.username, role: '2', coin: 0, image: generateProfil(data.jenis_kelamin)})
+    UserService.createUser({ ...data, username: data.username, password: data.username, role: '2', coin: 0, image: generateProfil(data.jenis_kelamin)})
     .then(res => {
       getAllUsers();
       closeModalCreate();
       toast.success('Data berhasil dibuat', { position: 'bottom-center' });
-    }, (err) => {
-      console.log(err);
+    }, (error) => {
+      console.log(error);
+      if (error.response && error.response.status === 401) {
+        AuthService.logout();
+        history.push("/login");
+        window.location.reload();
+      }
+      if (error.response && error.response.status === 409) {
+        toast.error('Username sudah terdaftar !!!', { position: 'bottom-center' });
+      }
     })
   };
 
@@ -268,12 +277,11 @@ function Tables() {
     const sendData = {
       id_user: data.id_user,
       nama: data.edit_nama,
-      username: data.edit_nama,
-      password: data.edit_nama,
       jenis_kelamin: data.edit_jenis_kelamin,
       kelas: data.edit_kelas
     }
 
+    console.log(sendData);
     UserService.updateSiswa(sendData).then(res => {
       getAllUsers();
       closeModalUpdate();
@@ -377,10 +385,24 @@ function Tables() {
 
       <Modal isOpen={modalCreate} onClose={closeModalCreate}>
         <form onSubmit={handleSubmit(createUser)}>
-          <ModalHeader>Form Tambah Data Guru</ModalHeader>
+          <ModalHeader>Form Tambah Data Siswa</ModalHeader>
           <ModalBody className='mt-4'>
             <div>
               <Label>
+                <span>Username</span>
+                <Input
+                  {...register("username", { required: 'Username is required' })}
+                  type='text'
+                  placeholder='Masukan Username'
+                  className='mt-2'
+                />
+              </Label>
+              {!errors.username?.message && <HelperText valid={true}>*Username berisi nama digabungkan dengan no absen</HelperText>}
+              {errors.username?.message && (
+                <HelperText valid={false}>{errors.username?.message}</HelperText>
+              )}
+
+              <Label className="mt-4">
                 <span>Nama</span>
                 <Input
                   {...register("nama", { required: 'Nama is required' })}
@@ -444,7 +466,7 @@ function Tables() {
       {/* Modal update */}
       <Modal isOpen={modalUpdate} onClose={closeModalUpdate}>
         <form onSubmit={handleSubmit2(updateUser)}>
-          <ModalHeader>Form Edit Data Guru</ModalHeader>
+          <ModalHeader>Form Edit Data Siswa</ModalHeader>
           <ModalBody className='mt-4'>
             <div>
               <Input {...register2('id_user')} type='hidden' />

@@ -96,6 +96,7 @@ function DataTugas() {
   }
 
   const deleteTugas = (id) => {
+    console.log(id);
     TugasService.deleteTugas({id_tugas: id}).then(res => {
       getAllTugas();
       toast.success('Data berhasil dihapus', { position: 'bottom-center'});

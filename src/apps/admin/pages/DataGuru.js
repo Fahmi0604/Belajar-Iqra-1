@@ -156,12 +156,20 @@ function Tables() {
   }
 
   const createUser = (data) => {
-    UserService.createUser({ ...data, jenis_kelamin: null, kelas: null, role: 1 }).then(res => {
+    UserService.createUser({ ...data, jenis_kelamin: null, kelas: null, role: '1' }).then(res => {
       getAllUsers();
       closeModalCreate();
       toast.success('Data berhasil dibuat', { position: 'bottom-center' });
-    }, (err) => {
-      console.log(err);
+    }, (error) => {
+      console.log(error);
+      if (error.response && error.response.status === 401) {
+        AuthService.logout();
+        history.push("/login");
+        window.location.reload();
+      }
+      if (error.response && error.response.status === 409) {
+        toast.error('Username sudah terdaftar !!!', { position: 'bottom-center' });
+      }
     })
   };
 
@@ -304,6 +312,7 @@ function Tables() {
                   className='mt-2'
                 />
               </Label>
+              {!errors.username?.message && <HelperText valid={true}>*Username berisi nama digabungkan dengan tanggal lahir</HelperText>}
               {errors.username?.message && (
                 <HelperText valid={false}>{errors.username?.message}</HelperText>
               )}
