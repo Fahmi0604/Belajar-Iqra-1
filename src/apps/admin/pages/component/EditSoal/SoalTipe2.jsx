@@ -61,6 +61,7 @@ export default function SoalTipe2(props) {
                         />
                     </Label>
                     <div className="mb-3">
+                        {!errors.audiosoal?.message && <HelperText valid={true}>*Format nama file tidak boleh ada spasi dan simbol, kecuali underscore _ contoh : soal1_babata.mp3</HelperText>}
                         {errors.audiosoal?.message && (
                             <HelperText valid={false}>{errors.audiosoal?.message}</HelperText>
                         )}

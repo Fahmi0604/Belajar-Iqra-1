@@ -86,24 +86,32 @@ function EditSoal() {
           console.log(error);
         });
     } else if (tipeSoal === '2') {
-      const formData = new FormData();
-      // audiosoal nanti menjadi data_tambahan
-      formData.append('audiosoal', data.audiosoal[0]);
-      formData.append('id_soal', detailSoal.id_soal);
-      formData.append('kalimat_soal', data.kalimatsoal);
-      formData.append('huruf_soal', JSON.stringify([...hurufSoal]));
-      formData.append('huruf_bank', JSON.stringify([...data.pilih_huruf_bank]));
 
-      SoalService.updateSoal2(formData)
-        .then(response => {
-          toast.success('Soal berhasil diedit', { position: 'bottom-center' });
-          setTimeout(() => {
-            history.push(`/app/detailtugas/${uid}`);
-            window.location.reload();
-          }, 3000);
-        }, (error) => {
-          console.log(error);
-        });
+      let extensionFile = data.audiosoal[0].name.split('.').pop();
+
+      if (extensionFile === 'mp3') {
+        const formData = new FormData();
+        // audiosoal nanti menjadi data_tambahan
+        formData.append('audiosoal', data.audiosoal[0]);
+        formData.append('id_soal', detailSoal.id_soal);
+        formData.append('kalimat_soal', data.kalimatsoal);
+        formData.append('huruf_soal', JSON.stringify([...hurufSoal]));
+        formData.append('huruf_bank', JSON.stringify([...data.pilih_huruf_bank]));
+
+        SoalService.updateSoal2(formData)
+          .then(response => {
+            toast.success('Soal berhasil diedit', { position: 'bottom-center' });
+            setTimeout(() => {
+              history.push(`/app/detailtugas/${uid}`);
+              window.location.reload();
+            }, 3000);
+          }, (error) => {
+            console.log(error);
+          });
+      } else {
+        toast.error('Ekstensi file harus mp3', { position: 'bottom-center' })
+      }
+
     }
   }
 

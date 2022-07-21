@@ -32,8 +32,8 @@ function TambahSoal() {
 
   useEffect(() => {
     HurufService.getAllHuruf().then((response) => {
-        setHuruf(response.data.data);
-      },
+      setHuruf(response.data.data);
+    },
       (error) => {
         console.log("Private page", error.response);
         // Invalid token
@@ -75,13 +75,13 @@ function TambahSoal() {
       return;
     }
 
-    const newData_tambahan ={
+    const newData_tambahan = {
       garis: [...lines],
       titik: [...dot]
     }
 
     if (tipeSoal === '1') {
-      SoalService.createSoal({ id_tugas: uid, tipe: tipeSoal, kalimat_soal: data.kalimatsoal, huruf_soal: JSON.stringify([...hurufSoal]), huruf_bank: JSON.stringify([...data.pilih_huruf_bank]), data_tambahan: ''})
+      SoalService.createSoal({ id_tugas: uid, tipe: tipeSoal, kalimat_soal: data.kalimatsoal, huruf_soal: JSON.stringify([...hurufSoal]), huruf_bank: JSON.stringify([...data.pilih_huruf_bank]), data_tambahan: '' })
         .then(response => {
           toast.success('Soal berhasil dibuat', { position: 'bottom-center' });
           setTimeout(() => {
@@ -91,26 +91,33 @@ function TambahSoal() {
         }, (error) => {
           console.log(error);
         });
-    }else if (tipeSoal === '2') {
+    } else if (tipeSoal === '2') {
 
-      const formData = new FormData();
-      formData.append('audiosoal', data.audiosoal[0]);
-      formData.append('id_tugas', uid);
-      formData.append('tipe', tipeSoal);
-      formData.append('kalimat_soal', data.kalimatsoal);
-      formData.append('huruf_soal', JSON.stringify([...hurufSoal]));
-      formData.append('huruf_bank', JSON.stringify([...data.pilih_huruf_bank]));
+      let extensionFile = data.audiosoal[0].name.split('.').pop();
 
-      SoalService.createSoal2(formData)
-        .then(response => {
-          toast.success('Soal berhasil dibuat', { position: 'bottom-center' });
-          setTimeout(() => {
-            history.push(`/app/detailtugas/${uid}`);
-            window.location.reload();
-          }, 3000);
-        }, (error) => {
-          console.log(error);
-        });
+      if (extensionFile === 'mp3') {
+        const formData = new FormData();
+        formData.append('audiosoal', data.audiosoal[0]);
+        formData.append('id_tugas', uid);
+        formData.append('tipe', tipeSoal);
+        formData.append('kalimat_soal', data.kalimatsoal);
+        formData.append('huruf_soal', JSON.stringify([...hurufSoal]));
+        formData.append('huruf_bank', JSON.stringify([...data.pilih_huruf_bank]));
+
+        SoalService.createSoal2(formData)
+          .then(response => {
+            toast.success('Soal berhasil dibuat', { position: 'bottom-center' });
+            setTimeout(() => {
+              history.push(`/app/detailtugas/${uid}`);
+              window.location.reload();
+            }, 3000);
+          }, (error) => {
+            console.log(error);
+          });
+      } else {
+        toast.error('Ekstensi file harus mp3', { position: 'bottom-center' })
+      }
+
     }
     // else {
     //   SoalService.createSoal({ id_tugas: uid, tipe: tipeSoal, kalimat_soal: data.kalimatsoal, huruf_soal: '', huruf_bank: '', data_tambahan: JSON.stringify(newData_tambahan) })
@@ -134,7 +141,7 @@ function TambahSoal() {
         return <SoalTipe2 huruf={huruf} hurufSoal={hurufSoal} tambahHurufSoal={(e) => tambahHurufSoal(e)} hapusHurufSoal={(e) => hapusHurufSoal(e)} handleSimpan={(e) => handleSimpan(e)} />;
       case '3':
         return <SoalTipe3 />;
-        // return <SoalTipe3 lines={lines} setLines={(e) => setLines(e)} dot={dot} setDot={(e) => setDot(e)} handleSimpan={(e) => handleSimpan(e)} />;
+      // return <SoalTipe3 lines={lines} setLines={(e) => setLines(e)} dot={dot} setDot={(e) => setDot(e)} handleSimpan={(e) => handleSimpan(e)} />;
       default:
         return '';
     }

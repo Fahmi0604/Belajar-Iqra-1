@@ -14,7 +14,7 @@ export default function LoginSiswa() {
         const user = AuthService.getCurrentUser();
 
         UserService.getAllUsers().then(res => {
-            console.log(res.data);
+            // console.log(res.data);
             // console.log(res.data.data.filter(f => f.role === '2'));
             setUsers(res.data.data.filter(f => f.role === '2'));
         }, (error => {
@@ -63,7 +63,7 @@ export default function LoginSiswa() {
 
     const generateFotoProfil = (data) => {
         const image = JSON.parse(data);
-        console.log(image.filter(f => f.unlock === true && f.use === true).map(m => ('/' + m.nama + '.svg')));
+        // console.log(image.filter(f => f.unlock === true && f.use === true).map(m => ('/' + m.nama + '.svg')));
         return (<img src={image.filter(f => f.unlock === true && f.use === true).map(m => ('/' + m.nama + '.svg'))} alt="profil" />);
     }
 
