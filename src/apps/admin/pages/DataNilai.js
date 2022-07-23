@@ -128,6 +128,7 @@ function Tables() {
 
         // nilai dijumlah berdasarkan id_tugas dan id_user yang sama dan menjadi totalNilai
         data.forEach((e, i) => {
+          if(e.tipe === '1' || e.tipe === '2')
           if (arrayTemp.some(s => s.id_tugas === e.id_tugas && s.id_user === e.id_user)) {
             let index = arrayTemp.findIndex(fi => fi.id_tugas === e.id_tugas && fi.id_user === e.id_user)
             arrayTemp[index].totalNilai = arrayTemp[index].totalNilai + e.nilai;
@@ -179,7 +180,6 @@ function Tables() {
 
       arrayTemp.forEach((e, i) => {
         if (dataJawaban.some(s => s.id_user === e.id_user && s.id_tugas === parseInt(pilihanFilter))) {
-          console.log('masuk');
           let index = dataJawaban.findIndex(fi => fi.id_user === e.id_user && fi.id_tugas === parseInt(pilihanFilter));
           arrayTemp[i] = {
             ...dataUsers[i],
@@ -230,8 +230,6 @@ function Tables() {
     arrayTemp.forEach((e, i) => {
       if (dataJawaban.some(s => s.id_user === e.id_user && s.id_tugas === parseInt(id_tugas))) {
         let index = dataJawaban.findIndex(fi => fi.id_user === e.id_user && fi.id_tugas === parseInt(id_tugas));
-        console.log(typeof dataJawaban[index].id_tugas);
-        console.log(typeof arrayTemp[index].id_tugas);
         arrayTemp[i] = {
           ...dataUsers[i],
           id_tugas: dataJawaban[index].id_tugas,
