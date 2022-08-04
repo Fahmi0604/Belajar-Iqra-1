@@ -185,19 +185,24 @@ const Game1 = () => {
             let arr = await Object.keys(data).every((item, i) => data[item][0].huruf === digitsBeGone(item))
 
             // untuk menyimpan data jawaban
-            JawabanService.createJawaban({ id_user: user.uid, id_soal: location.state.data.id_soal, jawab: JSON.stringify(data), nilai: arr })
-                .then(res => {
-                    toast.success('data berhasil disimpan', { position: 'bottom-center' });
-                    getAllAnswer();
-                }, (error) => {
-                    console.log("Private page", error.response);
-                    // Invalid token
-                    if (error.response && error.response.status === 401) {
-                        AuthService.logout();
-                        navigate("/splash");
-                        window.location.reload();
-                    }
-                });
+            toast.promise(
+                JawabanService.createJawaban({ id_user: user.uid, id_soal: location.state.data.id_soal, jawab: JSON.stringify(data), nilai: arr })
+                    .then(res => {
+                        // toast.success('data berhasil disimpan', { position: 'bottom-center' });
+                        getAllAnswer();
+                    }, (error) => {
+                        console.log("Private page", error.response);
+                        // Invalid token
+                        if (error.response && error.response.status === 401) {
+                            AuthService.logout();
+                            navigate("/splash");
+                            window.location.reload();
+                        }
+                    }), {
+                loading: 'Loading...',
+                success: 'Data Berhasil Disimpan',
+                error: 'gagal menyimpan data',
+            }, { position: 'bottom-center' });
 
             if (arr) {
                 UserService.updateCoin({ coin: 10, id_user: user.uid, tipe: 'tambah' })
@@ -211,7 +216,7 @@ const Game1 = () => {
                             navigate("/splash");
                             window.location.reload();
                         }
-                    });
+                    })
             }
 
         } else {

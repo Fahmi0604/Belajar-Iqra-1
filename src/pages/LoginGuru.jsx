@@ -41,6 +41,9 @@ function Login() {
         },
         (error) => {
           console.log(error);
+          if (error.response && error.response.status === 401) {
+            toast.error(error.response?.data.data, { position: 'bottom-center' });
+          }
         }
       );
     } catch (err) {

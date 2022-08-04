@@ -3,7 +3,7 @@ import { Link, useHistory } from "react-router-dom";
 import UserService from "../../../services/user.service";
 import AuthService from "../../../services/auth.service";
 import { useForm } from "react-hook-form";
-import toast, { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from "react-hot-toast";
 
 import PageTitle from "../../../components/Typography/PageTitle";
 // import SectionTitle from "../components/Typography/SectionTitle";
@@ -46,10 +46,22 @@ function Tables() {
   const [modalCreate, setModalCreate] = useState(false);
   const [modalUpdate, setModalUpdate] = useState(false);
   const [modalDelete, setModalDelete] = useState(false);
-  const [idUserForDelete, setIdUserForDelete] = useState('');
+  const [idUserForDelete, setIdUserForDelete] = useState("");
 
-  const { register, formState: { errors }, handleSubmit, setValue, resetField } = useForm();
-  const { register: register2, formState: { errors: errors2 }, handleSubmit: handleSubmit2, setValue: setValue2, resetField: resetField2 } = useForm();
+  const {
+    register,
+    formState: { errors },
+    handleSubmit,
+    setValue,
+    resetField,
+  } = useForm();
+  const {
+    register: register2,
+    formState: { errors: errors2 },
+    handleSubmit: handleSubmit2,
+    setValue: setValue2,
+    resetField: resetField2,
+  } = useForm();
 
   // setup pages control for every table
   const [pageTable, setPageTable] = useState(1);
@@ -72,16 +84,22 @@ function Tables() {
   }
 
   function closeModalCreate() {
-    resetField('nama');
-    resetField('username');
-    resetField('password');
+    resetField("nama");
+    resetField("username");
+    resetField("password");
     setModalCreate(false);
   }
 
   function openModalUpdate(id) {
-    setValue2('id_user', id);
-    setValue2('edit_nama', dataTable.filter(e => e.id_user === id).map(e => e.nama));
-    setValue2('edit_username', dataTable.filter(e => e.id_user === id).map(e => e.username));
+    setValue2("id_user", id);
+    setValue2(
+      "edit_nama",
+      dataTable.filter((e) => e.id_user === id).map((e) => e.nama)
+    );
+    setValue2(
+      "edit_username",
+      dataTable.filter((e) => e.id_user === id).map((e) => e.username)
+    );
     setModalUpdate(true);
   }
 
@@ -95,7 +113,7 @@ function Tables() {
   }
 
   function closeModalDelete() {
-    setIdUserForDelete('');
+    setIdUserForDelete("");
     setModalDelete(false);
   }
 
@@ -105,7 +123,7 @@ function Tables() {
   useEffect(() => {
     UserService.getAllUsers().then(
       (response) => {
-        const data = response.data.data.filter(e => e.role === '1');
+        const data = response.data.data.filter((e) => e.role === "1");
 
         console.log(data);
 
@@ -118,7 +136,7 @@ function Tables() {
         );
       },
       (error) => {
-        toast.error(error, { position: 'bottom-center' })
+        toast.error(error, { position: "bottom-center" });
         console.log("Private page", error.response);
         // Invalid token
         if (error.response && error.response.status === 401) {
@@ -133,7 +151,7 @@ function Tables() {
   const getAllUsers = () => {
     UserService.getAllUsers().then(
       (response) => {
-        const data = response.data.data.filter(e => e.role === '1');
+        const data = response.data.data.filter((e) => e.role === "1");
 
         setTotalResults(data.length);
         setDataTable(
@@ -153,24 +171,34 @@ function Tables() {
         }
       }
     );
-  }
+  };
 
   const createUser = (data) => {
-    UserService.createUser({ ...data, jenis_kelamin: null, kelas: null, role: '1' }).then(res => {
-      getAllUsers();
-      closeModalCreate();
-      toast.success('Data berhasil dibuat', { position: 'bottom-center' });
-    }, (error) => {
-      console.log(error);
-      if (error.response && error.response.status === 401) {
-        AuthService.logout();
-        history.push("/login");
-        window.location.reload();
+    UserService.createUser({
+      ...data,
+      jenis_kelamin: null,
+      kelas: null,
+      role: "1",
+    }).then(
+      (res) => {
+        getAllUsers();
+        closeModalCreate();
+        toast.success("Data berhasil dibuat", { position: "bottom-center" });
+      },
+      (error) => {
+        console.log(error);
+        if (error.response && error.response.status === 401) {
+          AuthService.logout();
+          history.push("/login");
+          window.location.reload();
+        }
+        if (error.response && error.response.status === 409) {
+          toast.error("Username sudah terdaftar !!!", {
+            position: "bottom-center",
+          });
+        }
       }
-      if (error.response && error.response.status === 409) {
-        toast.error('Username sudah terdaftar !!!', { position: 'bottom-center' });
-      }
-    })
+    );
   };
 
   const updateUser = (data) => {
@@ -178,32 +206,38 @@ function Tables() {
       id_user: data.id_user,
       nama: data.edit_nama,
       username: data.edit_username,
-    }
+    };
 
     console.log(data);
     console.log(sendData);
     console.log(JSON.stringify(sendData));
     console.log(JSON.parse(JSON.stringify(sendData)));
 
-    UserService.updateGuru(sendData).then(res => {
-      getAllUsers();
-      closeModalUpdate();
-      toast.success('Data berhasil diedit', { position: 'bottom-center' });
-    }, (err) => {
-      console.log(err);
-    })
-  }
+    UserService.updateGuru(sendData).then(
+      (res) => {
+        getAllUsers();
+        closeModalUpdate();
+        toast.success("Data berhasil diedit", { position: "bottom-center" });
+      },
+      (err) => {
+        console.log(err);
+      }
+    );
+  };
 
   const deleteUser = (id) => {
-    UserService.deleteUser({ id_user: id }).then(res => {
-      // console.log(res);
-      closeModalDelete();
-      getAllUsers();
-      toast.success('Data berhasil dihapus', { position: 'bottom-center' });
-    }, (err) => {
-      console.log(err);
-    })
-  }
+    UserService.deleteUser({ id_user: id }).then(
+      (res) => {
+        // console.log(res);
+        closeModalDelete();
+        getAllUsers();
+        toast.success("Data berhasil dihapus", { position: "bottom-center" });
+      },
+      (err) => {
+        console.log(err);
+      }
+    );
+  };
 
   useEffect(() => {
     // console.log(totalResults);
@@ -256,10 +290,20 @@ function Tables() {
                 </TableCell>
                 <TableCell>
                   <div className='flex items-center space-x-4'>
-                    <Button onClick={() => openModalUpdate(user.id_user)} layout='link' size='icon' aria-label='Edit'>
+                    <Button
+                      onClick={() => openModalUpdate(user.id_user)}
+                      layout='link'
+                      size='icon'
+                      aria-label='Edit'
+                    >
                       <EditIcon className='w-5 h-5' aria-hidden='true' />
                     </Button>
-                    <Button onClick={() => openModalDelete(user.id_user)} layout='link' size='icon' aria-label='Delete'>
+                    <Button
+                      onClick={() => openModalDelete(user.id_user)}
+                      layout='link'
+                      size='icon'
+                      aria-label='Delete'
+                    >
                       <TrashIcon className='w-5 h-5' aria-hidden='true' />
                     </Button>
                   </div>
@@ -286,7 +330,7 @@ function Tables() {
               <Label>
                 <span>Nama</span>
                 <Input
-                  {...register("nama", { required: 'Nama is required' })}
+                  {...register("nama", { required: "Nama is required" })}
                   type='text'
                   placeholder='Masukan Nama'
                   className='mt-2'
@@ -300,7 +344,7 @@ function Tables() {
                 <span>Username</span>
                 <Input
                   {...register("username", {
-                    required: 'Username is required',
+                    required: "Username is required",
                     pattern: {
                       // value:
                       //   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
@@ -312,22 +356,32 @@ function Tables() {
                   className='mt-2'
                 />
               </Label>
-              {!errors.username?.message && <HelperText valid={true}>*Username berisi nama digabungkan dengan tanggal lahir</HelperText>}
+              {!errors.username?.message && (
+                <HelperText valid={true}>
+                  *Username berisi nama digabungkan dengan tanggal lahir
+                </HelperText>
+              )}
               {errors.username?.message && (
-                <HelperText valid={false}>{errors.username?.message}</HelperText>
+                <HelperText valid={false}>
+                  {errors.username?.message}
+                </HelperText>
               )}
 
               <Label className='mt-2'>
                 <span>Password</span>
                 <Input
-                  {...register("password", { required: 'Password is required' })}
+                  {...register("password", {
+                    required: "Password is required",
+                  })}
                   type='password'
                   placeholder='Masukan Password'
                   className='mt-2'
                 />
               </Label>
               {errors.password?.message && (
-                <HelperText valid={false}>{errors.password?.message}</HelperText>
+                <HelperText valid={false}>
+                  {errors.password?.message}
+                </HelperText>
               )}
             </div>
           </ModalBody>
@@ -341,7 +395,12 @@ function Tables() {
               <Button type='submit'>Simpan</Button>
             </div>
             <div className='block w-full sm:hidden'>
-              <Button block size='large' layout='outline' onClick={closeModalCreate}>
+              <Button
+                block
+                size='large'
+                layout='outline'
+                onClick={closeModalCreate}
+              >
                 Batal
               </Button>
             </div>
@@ -360,25 +419,27 @@ function Tables() {
           <ModalHeader>Form Edit Data Guru</ModalHeader>
           <ModalBody className='mt-4'>
             <div>
-              <Input {...register2('id_user')} type='hidden' />
+              <Input {...register2("id_user")} type='hidden' />
               <Label>
                 <span>Nama</span>
                 <Input
-                  {...register2("edit_nama", { required: 'Nama is required' })}
+                  {...register2("edit_nama", { required: "Nama is required" })}
                   type='text'
                   placeholder='Masukan Nama'
                   className='mt-2'
                 />
               </Label>
               {errors2.edit_nama?.message && (
-                <HelperText valid={false}>{errors2.edit_nama?.message}</HelperText>
+                <HelperText valid={false}>
+                  {errors2.edit_nama?.message}
+                </HelperText>
               )}
 
               <Label className='mt-2'>
                 <span>Username</span>
                 <Input
                   {...register2("edit_username", {
-                    required: 'Username is required',
+                    required: "Username is required",
                     pattern: {
                       // value:
                       //   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
@@ -391,9 +452,10 @@ function Tables() {
                 />
               </Label>
               {errors2.edit_username?.message && (
-                <HelperText valid={false}>{errors2.edit_username?.message}</HelperText>
+                <HelperText valid={false}>
+                  {errors2.edit_username?.message}
+                </HelperText>
               )}
-
             </div>
           </ModalBody>
           <ModalFooter>
@@ -406,7 +468,12 @@ function Tables() {
               <Button type='submit'>Simpan</Button>
             </div>
             <div className='block w-full sm:hidden'>
-              <Button block size='large' layout='outline' onClick={closeModalUpdate}>
+              <Button
+                block
+                size='large'
+                layout='outline'
+                onClick={closeModalUpdate}
+              >
                 Batal
               </Button>
             </div>
@@ -421,25 +488,32 @@ function Tables() {
 
       <Modal isOpen={modalDelete} onClose={closeModalDelete}>
         <ModalHeader>Perhatian!!</ModalHeader>
-        <ModalBody>
-          Apakah anda yakin untuk menghapus ?
-        </ModalBody>
+        <ModalBody>Apakah anda yakin untuk menghapus ?</ModalBody>
         <ModalFooter>
-          <div className="hidden sm:block">
-            <Button layout="outline" onClick={closeModalDelete}>
+          <div className='hidden sm:block'>
+            <Button layout='outline' onClick={closeModalDelete}>
               Batal
             </Button>
           </div>
-          <div className="hidden sm:block">
-            <Button onClick={() => deleteUser(idUserForDelete)} >Ya</Button>
+          <div className='hidden sm:block'>
+            <Button onClick={() => deleteUser(idUserForDelete)}>Ya</Button>
           </div>
-          <div className="block w-full sm:hidden">
-            <Button block size="large" layout="outline" onClick={closeModalDelete}>
+          <div className='block w-full sm:hidden'>
+            <Button
+              block
+              size='large'
+              layout='outline'
+              onClick={closeModalDelete}
+            >
               Batal
             </Button>
           </div>
-          <div className="block w-full sm:hidden">
-            <Button onClick={() => deleteUser(idUserForDelete)} block size="large">
+          <div className='block w-full sm:hidden'>
+            <Button
+              onClick={() => deleteUser(idUserForDelete)}
+              block
+              size='large'
+            >
               Ya
             </Button>
           </div>
