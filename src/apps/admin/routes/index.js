@@ -1,21 +1,23 @@
-import { lazy } from 'react'
+import { lazy } from "react";
 
 // use lazy for better code splitting, a.k.a. load faster
-const Dashboard = lazy(() => import('../pages/Dashboard'))
-const Forms = lazy(() => import('../../../pages/Forms'))
-const Cards = lazy(() => import('../../../pages/Cards'))
-const Charts = lazy(() => import('../../../pages/Charts'))
-const Buttons = lazy(() => import('../../../pages/Buttons'))
-const Modals = lazy(() => import('../../../pages/Modals'))
-const DataGuru = lazy(() => import('../pages/DataGuru'))
-const DataSiswa = lazy(() => import('../pages/DataSiswa'))
-const Page404 = lazy(() => import('../../../pages/404'))
-const Blank = lazy(() => import('../../../pages/Blank'))
-const DataTugas = lazy(() => import('../pages/DataTugas'))
-const DataNilai = lazy(() => import('../pages/DataNilai'))
-const TambahSoal = lazy(() => import('../pages/TambahSoal'))
-const EditSoal =lazy(() => import('../pages/EditSoal'))
-const DetailTugas = lazy(() => import( '../pages/DetailTugas'))
+const Dashboard = lazy(() => import("../pages/Dashboard"));
+const Forms = lazy(() => import("../../../pages/Forms"));
+const Cards = lazy(() => import("../../../pages/Cards"));
+const Charts = lazy(() => import("../../../pages/Charts"));
+const Buttons = lazy(() => import("../../../pages/Buttons"));
+const Modals = lazy(() => import("../../../pages/Modals"));
+const DataGuru = lazy(() => import("../pages/DataGuru"));
+const DataSiswa = lazy(() => import("../pages/DataSiswa"));
+const Page404 = lazy(() => import("../../../pages/404"));
+const Blank = lazy(() => import("../../../pages/Blank"));
+const DataTugas = lazy(() => import("../pages/DataTugas"));
+const DataNilai = lazy(() => import("../pages/DataNilai"));
+const TambahSoal = lazy(() => import("../pages/TambahSoal"));
+const EditSoal = lazy(() => import("../pages/EditSoal"));
+const DetailTugas = lazy(() => import("../pages/DetailTugas"));
+const DataAngkatan = lazy(() => import("../pages/DataAngakatan"));
+const DataToko = lazy(() => import("../pages/DataToko"));
 
 /**
  * ⚠ These are internal routes!
@@ -29,65 +31,73 @@ const DetailTugas = lazy(() => import( '../pages/DetailTugas'))
  */
 const routes = [
   {
-    path: '/dashboard', // the url
+    path: "/dashboard", // the url
     component: Dashboard, // view rendered
   },
   {
-    path: '/forms',
+    path: "/forms",
     component: Forms,
   },
   {
-    path: '/cards',
+    path: "/cards",
     component: Cards,
   },
   {
-    path: '/charts',
+    path: "/charts",
     component: Charts,
   },
   {
-    path: '/buttons',
+    path: "/buttons",
     component: Buttons,
   },
   {
-    path: '/modals',
+    path: "/modals",
     component: Modals,
   },
   {
-    path: '/dataguru',
+    path: "/dataguru",
     component: DataGuru,
   },
   {
-    path: '/datasiswa',
+    path: "/datasiswa",
     component: DataSiswa,
   },
   {
-    path: '/datatugas',
+    path: "/datatugas",
     component: DataTugas,
   },
   {
-    path: '/datanilai',
+    path: "/datanilai",
     component: DataNilai,
   },
   {
-    path: '/detailtugas/:uid',
+    path: "/dataAngkatan",
+    component: DataAngkatan,
+  },
+  {
+    path: "/dataToko",
+    component: DataToko,
+  },
+  {
+    path: "/detailtugas/:uid",
     component: DetailTugas,
   },
   {
-    path: '/tambahsoal/:uid',
+    path: "/tambahsoal/:uid",
     component: TambahSoal,
   },
   {
-    path: '/editsoal/:uid',
+    path: "/editsoal/:uid",
     component: EditSoal,
   },
   {
-    path: '/404',
+    path: "/404",
     component: Page404,
   },
   {
-    path: '/blank',
+    path: "/blank",
     component: Blank,
   },
-]
+];
 
-export default routes
+export default routes;

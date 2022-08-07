@@ -30,6 +30,7 @@ import {
   HelperText,
 } from "@windmill/react-ui";
 import { EditIcon, TrashIcon, PlusIcon } from "../../../icons";
+import AngkatanService from "../service/angkatan.service";
 
 // import response from "../utils/demo/tableData";
 // make a copy of the data, for the second table
@@ -47,7 +48,9 @@ function Tables() {
   const [modalCreate, setModalCreate] = useState(false);
   const [modalUpdate, setModalUpdate] = useState(false);
   const [modalDelete, setModalDelete] = useState(false);
+  const [modalDeleteAll, setModalDeleteAll] = useState(false);
   const [idUserForDelete, setIdUserForDelete] = useState("");
+  const [pilihanFilter, setPilihanFilter] = useState("");
 
   const {
     register,
@@ -70,6 +73,8 @@ function Tables() {
   // setup data for every table
   const [dataTable, setDataTable] = useState([]);
   const [totalResults, setTotalResults] = useState(0);
+
+  const [dataAngkatan, setDataAngkatan] = useState([]);
 
   // pagination setup
   const resultsPerPage = 10;
@@ -105,6 +110,10 @@ function Tables() {
       "edit_kelas",
       dataTable.filter((e) => e.id_user === id).map((e) => e.kelas)
     );
+    setValue2(
+      "edit_id_angkatan",
+      dataTable.filter((e) => e.id_user === id).map((e) => e.id_angkatan)
+    );
     setModalUpdate(true);
   }
 
@@ -120,6 +129,13 @@ function Tables() {
   function closeModalDelete() {
     setIdUserForDelete("");
     setModalDelete(false);
+  }
+  function openModalDeleteAll() {
+    setModalDeleteAll(true);
+  }
+
+  function closeModalDeleteAll() {
+    setModalDeleteAll(false);
   }
 
   // on page change, load new sliced data
@@ -151,12 +167,61 @@ function Tables() {
         }
       }
     );
+
+    getAllAngkatan();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [history, pageTable]);
+
+  const getAllAngkatan = () => {
+    AngkatanService.getAllAngkatan().then(
+      (res) => {
+        setDataAngkatan(res.data.data);
+      },
+      (error) => {
+        console.log("Private page", error.response);
+        // Invalid token
+        if (error.response && error.response.status === 401) {
+          AuthService.logout();
+          history.push("/login");
+          window.location.reload();
+        }
+      }
+    );
+  };
 
   const getAllUsers = () => {
     UserService.getAllUsers().then(
       (response) => {
         const data = response.data.data.filter((e) => e.role === "2");
+
+        setTotalResults(data.length);
+        setDataTable(
+          data.slice(
+            (pageTable - 1) * resultsPerPage,
+            pageTable * resultsPerPage
+          )
+        );
+      },
+      (error) => {
+        console.log("Private page", error.response);
+        // Invalid token
+        if (error.response && error.response.status === 401) {
+          AuthService.logout();
+          history.push("/login");
+          window.location.reload();
+        }
+      }
+    );
+  };
+
+  const getAllUsersByAngkatan = (id_angkatan) => {
+    console.log(typeof id_angkatan.toString());
+
+    UserService.getAllUsers().then(
+      (response) => {
+        const data = response.data.data.filter(
+          (e) => e.role === "2" && e.id_angkatan === parseInt(id_angkatan)
+        );
 
         setTotalResults(data.length);
         setDataTable(
@@ -316,6 +381,7 @@ function Tables() {
       nama: data.edit_nama,
       jenis_kelamin: data.edit_jenis_kelamin,
       kelas: data.edit_kelas,
+      id_angkatan: parseInt(data.edit_id_angkatan),
     };
 
     console.log(sendData);
@@ -345,12 +411,26 @@ function Tables() {
     );
   };
 
+  const deleteAllUserByIdAngkatan = () => {
+    UserService.deleteAllUserByIdAngkatan({
+      id_angkatan: parseInt(pilihanFilter),
+    }).then(
+      (res) => {
+        // console.log(res);
+        closeModalDeleteAll();
+        getAllUsers();
+        toast.success("Data berhasil dihapus", { position: "bottom-center" });
+      },
+      (err) => {
+        console.log(err);
+      }
+    );
+  };
+
   useEffect(() => {
-    // console.log(totalResults);
-    // console.log(errors);
-    // console.log(register);
-    // console.log(dataTable);
-  }, [totalResults, dataTable, errors, register]);
+    getAllUsersByAngkatan(pilihanFilter);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pilihanFilter]);
 
   return (
     <>
@@ -370,6 +450,33 @@ function Tables() {
         </Button>
       </div>
 
+      <div className='flex flex-col sm:flex-row sm:justify-end mb-4'>
+        <Label className='my-4 mr-2'>
+          <Select
+            className='mt-1'
+            onChange={(e) => setPilihanFilter(e.target.value)}
+          >
+            <option value={""}>Pilih Angkatan</option>
+            {dataAngkatan.map((tugas, index) => (
+              <option key={index} value={tugas.id_angkatan}>
+                {tugas.nama_angkatan}
+              </option>
+            ))}
+          </Select>
+        </Label>
+
+        {
+          <Button
+            size='regular'
+            onClick={() => openModalDeleteAll()}
+            className='my-4'
+            disabled={pilihanFilter === ""}
+          >
+            Hapus Semua Siswa
+          </Button>
+        }
+      </div>
+
       <TableContainer className='mb-8 border'>
         <Table>
           <TableHeader>
@@ -377,53 +484,59 @@ function Tables() {
               <TableCell>Nama</TableCell>
               <TableCell>Jenis Kelamin</TableCell>
               <TableCell>Kelas</TableCell>
+              <TableCell>Angkatan</TableCell>
               <TableCell>Koin</TableCell>
               <TableCell>Terakhir Login</TableCell>
               <TableCell>Actions</TableCell>
             </tr>
           </TableHeader>
           <TableBody>
-            {dataTable.map((user, i) => (
-              <TableRow key={i}>
-                <TableCell>
-                  <span className='text-sm'>{user.nama}</span>
-                </TableCell>
-                <TableCell>
-                  <span className='text-sm'>{user.jenis_kelamin}</span>
-                </TableCell>
-                <TableCell>
-                  <span className='text-sm'>{user.kelas}</span>
-                </TableCell>
-                <TableCell>
-                  <span className='text-sm'>{user.coin}</span>
-                </TableCell>
-                <TableCell>
-                  <span className='text-sm'>
-                    {new Date(user.terakhir_login).toLocaleString()}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <div className='flex items-center space-x-4'>
-                    <Button
-                      onClick={() => openModalUpdate(user.id_user)}
-                      layout='link'
-                      size='icon'
-                      aria-label='Edit'
-                    >
-                      <EditIcon className='w-5 h-5' aria-hidden='true' />
-                    </Button>
-                    <Button
-                      onClick={() => openModalDelete(user.id_user)}
-                      layout='link'
-                      size='icon'
-                      aria-label='Delete'
-                    >
-                      <TrashIcon className='w-5 h-5' aria-hidden='true' />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
+            {pilihanFilter !== ""
+              ? dataTable.map((user, i) => (
+                  <TableRow key={i}>
+                    <TableCell>
+                      <span className='text-sm'>{user.nama}</span>
+                    </TableCell>
+                    <TableCell>
+                      <span className='text-sm'>{user.jenis_kelamin}</span>
+                    </TableCell>
+                    <TableCell>
+                      <span className='text-sm'>{user.kelas}</span>
+                    </TableCell>
+                    <TableCell>
+                      <span className='text-sm'>{user.nama_angkatan}</span>
+                    </TableCell>
+                    <TableCell>
+                      <span className='text-sm'>{user.coin}</span>
+                    </TableCell>
+                    <TableCell>
+                      <span className='text-sm'>
+                        {new Date(user.terakhir_login).toLocaleString()}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className='flex items-center space-x-4'>
+                        <Button
+                          onClick={() => openModalUpdate(user.id_user)}
+                          layout='link'
+                          size='icon'
+                          aria-label='Edit'
+                        >
+                          <EditIcon className='w-5 h-5' aria-hidden='true' />
+                        </Button>
+                        <Button
+                          onClick={() => openModalDelete(user.id_user)}
+                          layout='link'
+                          size='icon'
+                          aria-label='Delete'
+                        >
+                          <TrashIcon className='w-5 h-5' aria-hidden='true' />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              : null}
           </TableBody>
         </Table>
         <TableFooter>
@@ -436,6 +549,7 @@ function Tables() {
         </TableFooter>
       </TableContainer>
 
+      {/* create */}
       <Modal isOpen={modalCreate} onClose={closeModalCreate}>
         <form onSubmit={handleSubmit(createUser)}>
           <ModalHeader>Form Tambah Data Siswa</ModalHeader>
@@ -508,6 +622,28 @@ function Tables() {
               </Label>
               {errors.kelas?.message && (
                 <HelperText valid={false}>{errors.kelas?.message}</HelperText>
+              )}
+
+              <Label className='mt-2'>
+                <span>Angkatan</span>
+                <Select
+                  {...register("id_angkatan", {
+                    required: "Angkatan is required",
+                  })}
+                  className='mt-2'
+                >
+                  <option value=''>-</option>
+                  {dataAngkatan.map((e, i) => (
+                    <option key={i} value={e?.id_angkatan}>
+                      {e?.nama_angkatan}
+                    </option>
+                  ))}
+                </Select>
+              </Label>
+              {errors.id_angkatan?.message && (
+                <HelperText valid={false}>
+                  {errors.id_angkatan?.message}
+                </HelperText>
               )}
             </div>
           </ModalBody>
@@ -598,6 +734,28 @@ function Tables() {
                   {errors2.edit_kelas?.message}
                 </HelperText>
               )}
+
+              <Label className='mt-2'>
+                <span>Angkatan</span>
+                <Select
+                  {...register2("edit_id_angkatan", {
+                    required: "Angkatan is required",
+                  })}
+                  className='mt-2'
+                >
+                  <option value=''>-</option>
+                  {dataAngkatan.map((e, i) => (
+                    <option key={i} value={e?.id_angkatan}>
+                      {e?.nama_angkatan}
+                    </option>
+                  ))}
+                </Select>
+              </Label>
+              {errors2.edit_id_angkatan?.message && (
+                <HelperText valid={false}>
+                  {errors2.edit_id_angkatan?.message}
+                </HelperText>
+              )}
             </div>
           </ModalBody>
           <ModalFooter>
@@ -654,6 +812,43 @@ function Tables() {
           <div className='block w-full sm:hidden'>
             <Button
               onClick={() => deleteUser(idUserForDelete)}
+              block
+              size='large'
+            >
+              Ya
+            </Button>
+          </div>
+        </ModalFooter>
+      </Modal>
+
+      {/* Modal Delete All */}
+      <Modal isOpen={modalDeleteAll} onClose={closeModalDeleteAll}>
+        <ModalHeader>Perhatian!!</ModalHeader>
+        <ModalBody>
+          Apakah anda yakin untuk menghapus semua siswa berdasarkan angkatan ?
+        </ModalBody>
+        <ModalFooter>
+          <div className='hidden sm:block'>
+            <Button layout='outline' onClick={closeModalDeleteAll}>
+              Batal
+            </Button>
+          </div>
+          <div className='hidden sm:block'>
+            <Button onClick={() => deleteAllUserByIdAngkatan()}>Ya</Button>
+          </div>
+          <div className='block w-full sm:hidden'>
+            <Button
+              block
+              size='large'
+              layout='outline'
+              onClick={closeModalDeleteAll}
+            >
+              Batal
+            </Button>
+          </div>
+          <div className='block w-full sm:hidden'>
+            <Button
+              onClick={() => deleteAllUserByIdAngkatan()}
               block
               size='large'
             >
