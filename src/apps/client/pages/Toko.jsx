@@ -3,6 +3,7 @@ import { ChevronLeftIcon } from '@heroicons/react/solid';
 import { useHistory } from 'react-router-dom'
 import AuthService from '../../../services/auth.service';
 import UserService from '../../../services/user.service';
+import TokoService from '../../admin/service/toko.service';
 import {
     Button,
     Modal,
@@ -18,6 +19,7 @@ export default function Toko() {
     const history = useHistory();
     const [currentUser, setCurrentUser] = useState();
     const [listFotoProfil, setListFotoProfil] = useState([]);
+    const [dataToko, setDataToko] = useState([]);
     const [modal, setModal] = useState(false);
 
     // data temporary untuk pilihan yang mau dibeli
@@ -38,6 +40,7 @@ export default function Toko() {
 
     useEffect(() => {
         getCurrentUser();
+        getAllToko();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
@@ -58,6 +61,23 @@ export default function Toko() {
             }));
         }
     }
+
+    const getAllToko = () => {
+        TokoService.getAllToko().then(
+            (res) => {
+                setDataToko(res.data.data);
+            },
+            (error) => {
+                console.log("Private page", error.response);
+                // Invalid token
+                if (error.response && error.response.status === 401) {
+                    AuthService.logout();
+                    history.push("/login");
+                    window.location.reload();
+                }
+            }
+        );
+    };
 
     const updateCoin = () => {
         if (currentUser.coin > price) {
@@ -149,7 +169,7 @@ export default function Toko() {
                     <div className='w-3/4 flex flex-col justify-evenly'>
                         <h2 className='font-custom-font font-medium text-xl'>Selamat Datang</h2>
                         <div className='w-3/4 bg-white p-1 rounded-full pl-4'>
-                            <p>Poin ku : <strong>{currentUser && currentUser.coin}</strong></p>
+                            <p>Coin ku : <strong>{currentUser && currentUser.coin}</strong></p>
                         </div>
                     </div>
                     <div className='w-1/4 flex justify-center'>
@@ -158,18 +178,20 @@ export default function Toko() {
                 </div>
 
                 <div className='w-90% flex flex-wrap'>
-                    <button
+                    {dataToko.map((e, i) => (<button
+                        key={i}
                         className='w-47% mx-1.5% mb-8 flex flex-col justify-between items-center bg-custom-yellow shadow-custom-shadow-yellow rounded-md'
-                        onClick={() => openModal('profil_kucing', 300)}
-                        disabled={listFotoProfil.some(f => f.nama === 'profil_kucing' && f.unlock === true)}
+                        onClick={() => openModal(e?.nama_barang, e?.harga)}
+                        disabled={listFotoProfil.some(f => f.nama === e?.nama_barang && f.unlock === true)}
                     >
-                        <div className='bg-custom-text text-white p-1 rounded-b-md'>Profil Kucing</div>
-                        <img className='my-4' src="/profil_kucing.svg" alt="profil" />
+                        <div className='bg-custom-text text-white p-1 rounded-b-md'>{e?.nama_barang}</div>
+                        <img className='my-4' src={`/${e?.nama_barang}.svg`} alt="profil" />
                         <div className='bg-custom-text text-sm text-white py-1 px-2 -mb-2 shadow-custom-shadow-gray rounded-full'>
-                            {listFotoProfil.some(f => f.nama === 'profil_kucing' && f.unlock === true) ? 'Sudah dimiliki' : '300 poin'}
+                            {listFotoProfil.some(f => f.nama === 'profil_kucing' && f.unlock === true) ? 'Sudah dimiliki' : `${e?.harga} coin`}
                         </div>
-                    </button>
-                    <button
+                    </button>))}
+
+                    {/* <button
                         className='w-47% mx-1.5% mb-8 flex flex-col justify-between items-center bg-custom-yellow shadow-custom-shadow-yellow rounded-md'
                         onClick={() => openModal('profil_anjing', 300)}
                         disabled={listFotoProfil.some(f => f.nama === 'profil_anjing' && f.unlock === true)}
@@ -223,7 +245,7 @@ export default function Toko() {
                         <div className='bg-custom-text text-sm text-white py-1 px-2 -mb-2 shadow-custom-shadow-gray rounded-full'>
                             {listFotoProfil.some(f => f.nama === 'profil_rare_poni' && f.unlock === true) ? 'Sudah dimiliki' : '1000 poin'}
                         </div>
-                    </button>
+                    </button> */}
                 </div>
             </div>
 
