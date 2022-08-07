@@ -76,7 +76,6 @@ Aplikasi yang dibutuhkan sebelum melakukan installasi
     npm start
     ```
     Perintah di atas untuk menjalankan aplikasi 
-8.  Install MYSQL yang telah di download
 
 ## Fitur aplikasi
 
