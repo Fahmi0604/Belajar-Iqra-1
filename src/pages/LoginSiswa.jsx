@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import AuthService from '../services/auth.service';
 import UserService from '../services/user.service';
+import AngkatanService from '../apps/admin/service/angkatan.service';
 import { useHistory } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import { ChevronLeftIcon } from '@heroicons/react/solid'
@@ -9,6 +10,7 @@ export default function LoginSiswa() {
 
     const history = useHistory();
     const [users, setUsers] = useState([])
+    const [angkatanAktif, setAngkatanAktif] = useState({})
 
     useEffect(() => {
         const user = AuthService.getCurrentUser();
@@ -26,6 +28,8 @@ export default function LoginSiswa() {
                 window.location.reload();
             }
         }));
+
+        getAllAngkatan();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -61,6 +65,25 @@ export default function LoginSiswa() {
         }
     };
 
+    const getAllAngkatan = () => {
+        AngkatanService.getAllAngkatan().then(
+            (response) => {
+                const data = response.data?.data.filter((f, i) => f.status_angkatan === 1)[0];
+                setAngkatanAktif(data);
+                console.log(data);
+            },
+            (error) => {
+                console.log("Private page", error.response);
+                // Invalid token
+                if (error.response && error.response.status === 401) {
+                    AuthService.logout();
+                    history.push("/login");
+                    window.location.reload();
+                }
+            }
+        );
+    };
+
     const generateFotoProfil = (data) => {
         const image = JSON.parse(data);
         // console.log(image.filter(f => f.unlock === true && f.use === true).map(m => ('/' + m.nama + '.svg')));
@@ -86,8 +109,12 @@ export default function LoginSiswa() {
                         <p className='text-white text-3xl font-custom-font-gum font-medium mt-4'>TK A1</p>
                     </div>
 
+                    <div className='flex p-4 justify-center'>
+                        {(users.filter(f => f.kelas === 'A2' && f.id_angkatan === angkatanAktif?.id_angkatan).length < 1) && <p className='mt-4'>Siswa tidak ditemukan</p>}
+                    </div>
+
                     <div className='flex flex-wrap p-4'>
-                        {users.filter(f => f.kelas === 'A1').map((e, i) =>
+                        {users.filter(f => f.kelas === 'A1' && f.id_angkatan === angkatanAktif?.id_angkatan).map((e, i) =>
                             <button onClick={() => handleLogin(e.username, e.username)} key={i} className='flex w-47% p-2 bg-custom-secondary border-2 border-white rounded-md shadow-custom-shadow-gray text-custom-text text mb-3 mx-1.5% sm:w-31% sm:mx-1% sm:mb-4'>
                                 <div className='w-1/4 flex justify-center items-center'>
                                     {/* <img src={(e.jenis_kelamin === 'Laki-Laki') ? '/profil_laki.svg' : '/profil_perempuan.svg'} alt="profil" className='w-10 h-10' /> */}
@@ -107,8 +134,12 @@ export default function LoginSiswa() {
                         <p className='text-white text-3xl font-custom-font-gum font-medium mt-4'>TK A2</p>
                     </div>
 
+                    <div className='flex p-4 justify-center'>
+                        {(users.filter(f => f.kelas === 'A2' && f.id_angkatan === angkatanAktif?.id_angkatan).length < 1) && <p className='mt-4'>Siswa tidak ditemukan</p>}
+                    </div>
+
                     <div className='flex flex-wrap p-4'>
-                        {users.filter(f => f.kelas === 'A2').map((e, i) =>
+                        {users.filter(f => f.kelas === 'A2' && f.id_angkatan === angkatanAktif?.id_angkatan).map((e, i) =>
                             <button onClick={() => handleLogin(e.username, e.username)} key={i} className='flex w-47% p-2 bg-custom-secondary border-2 border-white rounded-md shadow-custom-shadow-gray text-custom-text text mb-3 mx-1.5% sm:w-31% sm:mx-1% sm:mb-4'>
                                 <div className='w-1/4 flex justify-center items-center'>
                                     {/* <img src={(e.jenis_kelamin === 'Laki-Laki') ? '/profil_laki.svg' : '/profil_perempuan.svg'} alt="profil" className='w-10 h-10' /> */}
